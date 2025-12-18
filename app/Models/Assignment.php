@@ -1,10 +1,26 @@
 <?php
 
-// app/Models/Assignment.php
 namespace App\Models;
-use Illuminate\Database\Eloquent\Model; use Illuminate\Database\Eloquent\Factories\HasFactory;
-class Assignment extends Model { use HasFactory;
-  protected $fillable=['course_id','title','instructions','due_at','max_score'];
-  public function course(){ return $this->belongsTo(Course::class); }
-}
 
+use Illuminate\Database\Eloquent\Model;
+
+class Assignment extends Model
+{
+    protected $fillable = [
+        'course_id',
+        'title',
+        'instructions',
+        'due_at',
+        'submission_mode',
+        'max_points',
+    ];
+
+    protected $casts = [
+        'due_at' => 'datetime',   // penting biar format() jalan
+    ];
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+}

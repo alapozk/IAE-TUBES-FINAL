@@ -1,80 +1,208 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\RoleMiddleware;
+
+// ================= Controllers =================
 use App\Http\Controllers\{
     HomeController,
     DashboardController,
     CoursePublicController,
     ProfileController
 };
+
+// Admin
 use App\Http\Controllers\Admin\UserController as AdminUser;
-use App\Http\Controllers\Teacher\CourseController as TeacherCourse;
-use App\Http\Controllers\Student\EnrollController as StudentEnroll;
-use App\Http\Middleware\RoleMiddleware; // ✅ Penting untuk rute middleware berdasarkan role
+
+// Teacher
+use App\Http\Controllers\Teacher\{
+    CourseController as TeacherCourseController,
+    MaterialController as TeacherMaterialController,
+    AssignmentController as TeacherAssignmentController,
+    QuizController as TeacherQuizController,
+    QuizQuestionController
+};
+
+// Student
+use App\Http\Controllers\Student\{
+    EnrollController as StudentEnrollController,
+    CourseController as StudentCourseController,
+    AssignmentController as StudentAssignmentController,
+    SubmissionController as StudentSubmissionController,
+    QuizAttemptController as StudentQuizAttemptController,
+    MaterialController as StudentMaterialController
+};
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| Public
 |--------------------------------------------------------------------------
 */
-
-//
-// Halaman utama (Publik)
-//
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-//
-// Dashboard (butuh login)
-//
-Route::middleware('auth')->get('/dashboard', [DashboardController::class, 'index'])
+/*
+|--------------------------------------------------------------------------
+| Dashboard
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')
+    ->get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
-//
-// Admin-only
-//
-Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function () {
-    Route::get('/admin/users', AdminUser::class)->name('admin.users');
-});
+/*
+|--------------------------------------------------------------------------
+| Admin
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', RoleMiddleware::class . ':admin'])
+    ->group(function () {
+        Route::get('/admin/users', AdminUser::class)
+            ->name('admin.users');
+    });
 
+/*
+|--------------------------------------------------------------------------
+| Teacher
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', RoleMiddleware::class . ':teacher'])
+    ->prefix('teacher')
+    ->group(function () {
 
+        // ===== Courses =====
+        Route::get('/courses', [TeacherCourseController::class, 'index'])
+            ->name('teacher.courses');
+        Route::get('/courses/create', [TeacherCourseController::class, 'create'])
+            ->name('teacher.courses.create');
+        Route::post('/courses', [TeacherCourseController::class, 'store'])
+            ->name('teacher.courses.store');
+        Route::get('/courses/{course}', [TeacherCourseController::class, 'show'])
+            ->name('teacher.courses.show');
+        Route::get('/courses/{course}/edit', [TeacherCourseController::class, 'edit'])
+            ->name('teacher.courses.edit');
+        Route::put('/courses/{course}', [TeacherCourseController::class, 'update'])
+            ->name('teacher.courses.update');
+        Route::delete('/courses/{course}', [TeacherCourseController::class, 'destroy'])
+            ->name('teacher.courses.destroy');
 
-//
-// Teacher-only
-//
-Route::middleware(['auth', RoleMiddleware::class . ':teacher'])->group(function () {
-    Route::get('/teacher/courses', [TeacherCourse::class, 'index'])->name('teacher.courses');
-    Route::get('/teacher/courses/create', [TeacherCourse::class, 'create'])->name('teacher.courses.create');
-    Route::post('/teacher/courses', [TeacherCourse::class, 'store'])->name('teacher.courses.store');
-    Route::get('/teacher/courses/{course}/edit', [TeacherCourse::class, 'edit'])->name('teacher.courses.edit');
-    Route::put('/teacher/courses/{course}', [TeacherCourse::class, 'update'])->name('teacher.courses.update');
-    Route::delete('/teacher/courses/{course}', [TeacherCourse::class, 'destroy'])->name('teacher.courses.destroy');
-});
+        // ===== Materials =====
+        Route::get('/courses/{course}/materials/create', [TeacherMaterialController::class, 'create'])
+            ->name('teacher.materials.create');
+        Route::post('/courses/{course}/materials', [TeacherMaterialController::class, 'store'])
+            ->name('teacher.materials.store');
+        Route::get('/courses/{course}/materials/{material}', [TeacherMaterialController::class, 'show'])
+            ->name('teacher.materials.show');
+        Route::get('/courses/{course}/materials/{material}/edit', [TeacherMaterialController::class, 'edit'])
+            ->name('teacher.materials.edit');
+        Route::put('/courses/{course}/materials/{material}', [TeacherMaterialController::class, 'update'])
+            ->name('teacher.materials.update');
+        Route::delete('/courses/{course}/materials/{material}', [TeacherMaterialController::class, 'destroy'])
+            ->name('teacher.materials.destroy');
 
-//
-// Student-only
-//
-Route::middleware(['auth', RoleMiddleware::class . ':student'])->group(function () {
-    Route::get('/student/my-courses', [StudentEnroll::class, 'myCourses'])->name('student.mycourses');
-    Route::post('/student/enroll/{course}', [StudentEnroll::class, 'enroll'])->name('student.enroll');
-});
+        // ===== Assignments =====
+        Route::get('/courses/{course}/assignments/create', [TeacherAssignmentController::class, 'create'])
+            ->name('teacher.assignments.create');
+        Route::post('/courses/{course}/assignments', [TeacherAssignmentController::class, 'store'])
+            ->name('teacher.assignments.store');
+        Route::get('/courses/{course}/assignments/{assignment}', [TeacherAssignmentController::class, 'show'])
+            ->name('teacher.assignments.show');
+        Route::get('/courses/{course}/assignments/{assignment}/edit', [TeacherAssignmentController::class, 'edit'])
+            ->name('teacher.assignments.edit');
+        Route::put('/courses/{course}/assignments/{assignment}', [TeacherAssignmentController::class, 'update'])
+            ->name('teacher.assignments.update');
+        Route::delete('/courses/{course}/assignments/{assignment}', [TeacherAssignmentController::class, 'destroy'])
+            ->name('teacher.assignments.destroy');
 
-//
-// Publik (katalog & detail kursus)
-//
-Route::get('/courses', [CoursePublicController::class, 'index'])->name('courses.catalog');
-Route::get('/courses/{course}', [CoursePublicController::class, 'show'])->name('courses.show');
+        // ===== Quizzes =====
+        Route::get('/courses/{course}/quizzes/create', [TeacherQuizController::class, 'create'])
+            ->name('teacher.courses.quizzes.create');
+        Route::post('/courses/{course}/quizzes', [TeacherQuizController::class, 'store'])
+            ->name('teacher.courses.quizzes.store');
+        Route::get('/courses/{course}/quizzes/{quiz}/edit', [TeacherQuizController::class, 'edit'])
+            ->name('teacher.courses.quizzes.edit');
+        Route::put('/courses/{course}/quizzes/{quiz}', [TeacherQuizController::class, 'update'])
+            ->name('teacher.courses.quizzes.update');
+        Route::patch('/courses/{course}/quizzes/{quiz}/toggle', [TeacherQuizController::class, 'togglePublish'])
+            ->name('teacher.courses.quizzes.toggle');
+        Route::delete('/courses/{course}/quizzes/{quiz}', [TeacherQuizController::class, 'destroy'])
+            ->name('teacher.courses.quizzes.destroy');
 
-//
-// Profile (Breeze default)
-//
+        // ===== Quiz Questions (MULTI SOAL) =====
+        Route::get('/quizzes/{quiz}/questions/create', [QuizQuestionController::class, 'create'])
+            ->name('teacher.quiz.questions.create');
+        Route::post('/quizzes/{quiz}/questions', [QuizQuestionController::class, 'store'])
+            ->name('teacher.quiz.questions.store');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Student
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', RoleMiddleware::class . ':student'])
+    ->prefix('student')
+    ->group(function () {
+
+        Route::get('/my-courses', [StudentEnrollController::class, 'myCourses'])
+            ->name('student.mycourses');
+
+        Route::post('/enroll/{course}', [StudentEnrollController::class, 'enroll'])
+            ->name('student.enroll');
+
+        Route::get('/courses/{course}', [StudentCourseController::class, 'show'])
+            ->name('student.courses.show');
+
+        // ===== Assignments Index (FIX ERROR) =====
+        Route::get('/assignments', [StudentAssignmentController::class, 'index'])
+            ->name('student.assignments.index');
+
+        // ===== Materials =====
+        Route::get('/courses/{course}/materials/{material}', [StudentMaterialController::class, 'show'])
+            ->name('student.materials.show');
+
+        // ===== Assignments Detail & Submit =====
+        Route::get('/courses/{course}/assignments/{assignment}', [StudentAssignmentController::class, 'show'])
+            ->name('student.assignments.show');
+
+        Route::get('/courses/{course}/assignments/{assignment}/submit', [StudentSubmissionController::class, 'create'])
+            ->name('student.submissions.create');
+
+        Route::post('/courses/{course}/assignments/{assignment}/submit', [StudentSubmissionController::class, 'store'])
+            ->name('student.submissions.store');
+
+        // ===== Quiz =====
+        Route::get('/quiz/{quiz}/start', [StudentQuizAttemptController::class, 'start'])
+            ->name('student.quiz.start');
+
+        Route::post('/quiz/{quiz}/answer', [StudentQuizAttemptController::class, 'answer'])
+            ->name('student.quiz.answer');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Public Course Catalog
+|--------------------------------------------------------------------------
+*/
+Route::get('/courses', [CoursePublicController::class, 'index'])
+    ->name('courses.catalog');
+
+Route::get('/courses/{course}', [CoursePublicController::class, 'show'])
+    ->name('courses.show');
+
+/*
+|--------------------------------------------------------------------------
+| Profile
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
-//
-// Auth scaffolding (login/register/logout)
-//
+/*
+|--------------------------------------------------------------------------
+| Auth (Laravel Breeze)
+|--------------------------------------------------------------------------
+*/
 require __DIR__ . '/auth.php';

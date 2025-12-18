@@ -287,10 +287,7 @@
   <div class="detail-container">
     
     <!-- Back Button -->
-    <a href="#" onclick="history.back(); return false;" class="back-btn">
-        ← Kembali
-    </a>
-
+    <a href="{{ url()->previous() }}" class="back">← Kembali</a>
 
     <!-- Hero Section -->
     <div class="hero-section">

@@ -28,6 +28,7 @@
   .header-top {
     display: flex;
     align-items: center;
+    justify-content: space-between; /* penting: title kiri, tombol kanan */
     gap: 20px;
     flex-wrap: wrap;
   }
@@ -49,6 +50,33 @@
   .header-content p {
     color: #718096;
     font-size: 1rem;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tasks-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: #4f46e5;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+    transition: all 0.2s ease;
+  }
+
+  .tasks-btn:hover {
+    background: #4338ca;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.45);
   }
 
   /* Courses Grid */
@@ -217,86 +245,40 @@
 
   /* Animations */
   @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 
   @keyframes shimmer {
-    0% {
-      left: -100%;
-    }
-    100% {
-      left: 100%;
-    }
+    0%   { left: -100%; }
+    100% { left: 100%; }
   }
 
   /* Responsive */
   @media (max-width: 768px) {
-    .courses-wrapper {
-      padding: 30px 15px;
-    }
-
-    .header-content h1 {
-      font-size: 1.8rem;
-    }
-
+    .courses-wrapper { padding: 30px 15px; }
+    .header-content h1 { font-size: 1.8rem; }
     .courses-grid {
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 20px;
     }
-
-    .course-footer {
-      flex-direction: column;
-    }
-
-    .course-btn {
-      width: 100%;
-    }
+    .course-footer { flex-direction: column; }
+    .course-btn { width: 100%; }
   }
 
   @media (max-width: 480px) {
-    .courses-wrapper {
-      padding: 20px 10px;
-    }
-
-    .header-content h1 {
-      font-size: 1.4rem;
-    }
-
-    .header-icon {
-      font-size: 1.8rem;
-    }
-
-    .courses-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .empty-state {
-      padding: 50px 20px;
-    }
-
-    .empty-icon {
-      font-size: 3rem;
-    }
-
-    .empty-state h3 {
-      font-size: 1.2rem;
-    }
+    .courses-wrapper { padding: 20px 10px; }
+    .header-content h1 { font-size: 1.4rem; }
+    .header-icon { font-size: 1.8rem; }
+    .courses-grid { grid-template-columns: 1fr; }
+    .empty-state { padding: 50px 20px; }
+    .empty-icon { font-size: 3rem; }
+    .empty-state h3 { font-size: 1.2rem; }
   }
 </style>
 
@@ -313,43 +295,46 @@
           </h1>
           <p>Kelola dan lanjutkan pembelajaran Anda</p>
         </div>
+
+        {{-- Tombol Lihat Tugas di sebelah "Kursus Saya" --}}
+        <div class="header-actions">
+          <a href="{{ route('student.assignments.index') }}" class="tasks-btn">
+            📝 Lihat Tugas
+          </a>
+        </div>
       </div>
     </div>
 
-    <!-- Courses Grid -->
-    @forelse($enrolled as $enrollment)
+    {{-- Courses --}}
+    @if($enrolled->count())
       <div class="courses-grid">
-        <div class="course-card">
-          <!-- Course Image -->
-          <div class="course-image">
-            📖
-          </div>
+        @foreach($enrolled as $enrollment)
+          <div class="course-card">
+            <div class="course-image">📖</div>
 
-          <!-- Course Content -->
-          <div class="course-content">
-            <h3 class="course-title">{{ $enrollment->course->title }}</h3>
+            <div class="course-content">
+              <h3 class="course-title">{{ $enrollment->course->title }}</h3>
+              <span class="course-status status-{{ $enrollment->status }}">
+                @if($enrollment->status === 'active')
+                  ✓ Sedang Belajar
+                @elseif($enrollment->status === 'pending')
+                  ⏳ Pending
+                @else
+                  ✓✓ {{ ucfirst($enrollment->status) }}
+                @endif
+              </span>
+            </div>
 
-            <!-- Status Badge -->
-            <span class="course-status status-{{ $enrollment->status }}">
-              @if($enrollment->status === 'active')
-                ✓ Sedang Belajar
-              @elseif($enrollment->status === 'pending')
-                ⏳ Pending
-              @else
-                ✓✓ {{ ucfirst($enrollment->status) }}
-              @endif
-            </span>
+            <div class="course-footer">
+              <a href="{{ route('courses.show', $enrollment->course) }}"
+                 class="course-btn btn-view">
+                Lihat Kursus
+              </a>
+            </div>
           </div>
-
-          <!-- Course Footer -->
-          <div class="course-footer">
-            <a href="{{ route('courses.show', $enrollment->course) }}" class="course-btn btn-view">
-              Lihat Kursus
-            </a>
-          </div>
-        </div>
+        @endforeach
       </div>
-    @empty
+    @else
       <div class="empty-state">
         <div class="empty-icon">📚</div>
         <h3>Belum Ada Kursus</h3>
@@ -358,9 +343,8 @@
           Jelajahi Kursus
         </a>
       </div>
-    @endforelse
+    @endif
 
   </div>
 </div>
-
 @endsection

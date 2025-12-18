@@ -11,6 +11,7 @@ class CourseController extends Controller {
         $courses = Course::where('teacher_id',$r->user()->id)->get();
         return view('teacher.courses', compact('courses'));
     }
+
     public function create()  { return view('teacher.course-create'); }
     public function store(Request $r) {
         $data = $r->validate([
@@ -38,5 +39,12 @@ class CourseController extends Controller {
     private function authorizeOwner(Course $c, $uid) {
         if ($c->teacher_id !== $uid) abort(403);
     }
+
+    public function show(Request $r, Course $course)
+    {
+        $this->authorizeOwner($course, $r->user()->id);
+        return view('teacher.course-show', compact('course'));
+    }
+
 }
 

@@ -11,6 +11,6 @@ class CoursePublicController extends Controller {
     }
     public function show(Course $course) {
         abort_unless($course->status==='published', 404);
-        return view('course.show', compact('course'));
+        return view('teacher.course-show', compact('course'));
     }
 }

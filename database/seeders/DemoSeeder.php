@@ -21,15 +21,6 @@ class DemoSeeder extends Seeder {
             'name'=>'Siswa Satu','email'=>'siswa@demo.test',
             'password'=>Hash::make('password'),'role'=>'student','status'=>'active'
         ]);
-
-        Course::create([
-            'title'=>'Pemrograman Dasar','code'=>'CS101',
-            'teacher_id'=>$teacher->id,'status'=>'published'
-        ]);
-        Course::create([
-            'title'=>'Basis Data Lanjut','code'=>'CS102',
-            'teacher_id'=>$teacher->id,'status'=>'draft'
-        ]);
     }
 }
 
