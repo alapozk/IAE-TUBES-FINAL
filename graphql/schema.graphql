@@ -1,0 +1,254 @@
+type Quiz {
+  id: ID!
+  title: String!
+  course_id: ID!
+  max_attempt: Int!
+  duration: Int
+  show_review: Boolean!
+  is_published: Boolean!
+}
+
+type Query {
+  teacherQuiz(quiz_id: ID!): Quiz
+    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@show")
+}
+
+type Mutation {
+  createQuiz(
+    course_id: ID!
+    title: String!
+    max_attempt: Int!
+    duration: Int
+    show_review: Boolean!
+  ): Quiz
+    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@store")
+}
+
+type QuizQuestion {
+  id: ID!
+  quiz_id: ID!
+  question: String!
+}
+
+extend type Query {
+  quizQuestions(quiz_id: ID!): [QuizQuestion!]!
+    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizQuestionResolver@list")
+}
+
+extend type Mutation {
+  createQuizQuestion(
+    quiz_id: ID!
+    question: String!
+  ): QuizQuestion
+    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizQuestionResolver@store")
+}
+
+type QuizOption {
+  id: ID!
+  quiz_question_id: ID!
+  option_text: String!
+  is_correct: Boolean!
+}
+
+extend type Mutation {
+  createQuizOption(
+    quiz_question_id: ID!
+    option_text: String!
+    is_correct: Boolean!
+  ): QuizOption
+    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizOptionResolver@store")
+}
+
+type QuizAttempt {
+  id: ID!
+  quiz_id: ID!
+  user_id: ID!
+  is_finished: Boolean!
+}
+
+extend type Mutation {
+  startQuiz(quiz_id: ID!): QuizAttempt
+    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizAttemptResolver@start")
+}
+
+type QuizAnswer {
+  id: ID!
+  quiz_attempt_id: ID!
+  quiz_question_id: ID!
+  quiz_option_id: ID!
+}
+
+extend type Mutation {
+  answerQuiz(
+    quiz_attempt_id: ID!
+    quiz_question_id: ID!
+    quiz_option_id: ID!
+  ): QuizAnswer
+    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizAnswerResolver@answer")
+}
+
+type QuizAttempt {
+  id: ID!
+  quiz_id: ID!
+  user_id: ID!
+  is_finished: Boolean!
+  score: Float
+  finished_at: DateTime
+}
+
+extend type Mutation {
+  finishQuizAttempt(quiz_attempt_id: ID!): QuizAttempt
+    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizScoringResolver@finish")
+}
+
+type Course {
+  id: ID!
+  title: String!
+  description: String
+  is_published: Boolean!
+}
+
+type Enrollment {
+  id: ID!
+  user_id: ID!
+  course_id: ID!
+  status: String!
+  course: Course
+}
+
+extend type Query {
+  courses: [Course!]!
+    @field(resolver: "App\\GraphQL\\Resolvers\\Public\\CourseResolver@list")
+
+  course(course_id: ID!): Course
+    @field(resolver: "App\\GraphQL\\Resolvers\\Public\\CourseResolver@show")
+
+  myEnrollments(user_id: ID!): [Enrollment!]!
+    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\EnrollmentResolver@myCourses")
+}
+
+extend type Mutation {
+  enrollCourse(
+    user_id: ID!
+    course_id: ID!
+  ): Enrollment
+    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\EnrollmentResolver@enroll")
+}
+
+type Assignment {
+  id: ID!
+  course_id: ID!
+  title: String!
+  description: String
+  deadline: DateTime!
+}
+
+type Submission {
+  id: ID!
+  assignment_id: ID!
+  user_id: ID!
+  content: String!
+  created_at: DateTime
+}
+
+extend type Query {
+
+  # Teacher
+  teacherAssignments(course_id: ID!): [Assignment!]!
+    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AssignmentResolver@listByCourse")
+
+  # Student
+  studentAssignments(course_id: ID!): [Assignment!]!
+    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\AssignmentResolver@listByCourse")
+}
+
+extend type Mutation {
+
+  # Teacher
+  createAssignment(
+    course_id: ID!
+    title: String!
+    description: String
+    deadline: DateTime!
+  ): Assignment
+    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AssignmentResolver@store")
+
+  # Student
+  submitAssignment(
+    assignment_id: ID!
+    user_id: ID!
+    content: String!
+  ): Submission
+    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\SubmissionResolver@submit")
+}
+
+type Material {
+  id: ID!
+  course_id: ID!
+  title: String!
+  content: String!
+  created_at: DateTime
+}
+
+extend type Query {
+
+  # Teacher
+  teacherMaterials(course_id: ID!): [Material!]!
+    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\MaterialResolver@listByCourse")
+
+  # Student
+  studentMaterials(course_id: ID!): [Material!]!
+    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\MaterialResolver@listByCourse")
+}
+
+extend type Mutation {
+
+  # Teacher
+  createMaterial(
+    course_id: ID!
+    title: String!
+    content: String!
+  ): Material
+    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\MaterialResolver@store")
+}
+
+type AttendanceSession {
+  id: ID!
+  course_id: ID!
+  title: String!
+  opened_at: DateTime!
+  closed_at: DateTime!
+}
+
+type AttendanceRecord {
+  id: ID!
+  attendance_session_id: ID!
+  user_id: ID!
+  checked_in_at: DateTime!
+}
+
+extend type Query {
+
+  # Teacher
+  attendanceSessions(course_id: ID!): [AttendanceSession!]!
+    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AttendanceSessionResolver@listByCourse")
+}
+
+extend type Mutation {
+
+  # Teacher
+  createAttendanceSession(
+    course_id: ID!
+    title: String!
+    opened_at: DateTime!
+    closed_at: DateTime!
+  ): AttendanceSession
+    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AttendanceSessionResolver@store")
+
+  # Student
+  checkInAttendance(
+    attendance_session_id: ID!
+    user_id: ID!
+  ): AttendanceRecord
+    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\AttendanceRecordResolver@checkIn")
+}

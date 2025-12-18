@@ -13,10 +13,14 @@ class Quiz extends Model
      * Kolom yang boleh diisi (mass assignment)
      */
     protected $fillable = [
-        'course_id',
-        'title',
-        'description',
-        'is_published',
+    'title',
+    'course_id',
+    'max_attempt',
+    'duration',
+    'deadline',
+    'show_review',
+    'is_published',
+    'created_by',
     ];
 
     /**
