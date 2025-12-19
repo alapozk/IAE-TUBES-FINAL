@@ -50,19 +50,54 @@ class QuizQuestionResolver
     }
 
     /**
-     * Create single question
+     * Show single question for editing
      */
-    public function store($_, array $args)
+    public function show($_, array $args)
     {
-        $quiz = Quiz::with('course')->findOrFail($args['quiz_id']);
+        $question = QuizQuestion::with('quiz.course')->findOrFail($args['id']);
         
-        if ($quiz->course->teacher_id !== Auth::id()) {
+        if ($question->quiz->course->teacher_id !== Auth::id()) {
             throw new \Exception('Unauthorized');
         }
 
-        return QuizQuestion::create([
-            'quiz_id' => $quiz->id,
+        return $question;
+    }
+
+    /**
+     * Update a quiz question
+     */
+    public function update($_, array $args)
+    {
+        $question = QuizQuestion::with('quiz.course')->findOrFail($args['id']);
+        
+        if ($question->quiz->course->teacher_id !== Auth::id()) {
+            throw new \Exception('Unauthorized');
+        }
+
+        $question->update([
             'question' => $args['question'],
+            'option_a' => $args['option_a'],
+            'option_b' => $args['option_b'],
+            'option_c' => $args['option_c'],
+            'option_d' => $args['option_d'],
+            'correct_answer' => $args['correct_answer'],
         ]);
+
+        return $question->fresh();
+    }
+
+    /**
+     * Delete a quiz question
+     */
+    public function delete($_, array $args)
+    {
+        $question = QuizQuestion::with('quiz.course')->findOrFail($args['id']);
+        
+        if ($question->quiz->course->teacher_id !== Auth::id()) {
+            throw new \Exception('Unauthorized');
+        }
+
+        $question->delete();
+        return true;
     }
 }

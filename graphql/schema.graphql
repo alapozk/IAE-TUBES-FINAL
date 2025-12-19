@@ -243,6 +243,7 @@ type Query {
   teacherQuiz(id: ID!): Quiz @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@show")
   teacherQuizAttempts(quiz_id: ID!): [QuizAttemptTeacherView!]! @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizAttemptResolver@list")
   teacherAssignmentSubmissions(assignment_id: ID!): [SubmissionTeacherView!]! @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\SubmissionResolver@list")
+  teacherQuizQuestion(id: ID!): QuizQuestion @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizQuestionResolver@show")
 
   # Student
   myEnrollments: [Enrollment!]! @field(resolver: "App\\GraphQL\\Resolvers\\Student\\EnrollmentResolver@myCourses")
@@ -292,6 +293,8 @@ type Mutation {
 
   # Teacher - Quiz Questions
   createQuizQuestions(quiz_id: ID!, questions: [QuizQuestionInput!]!): [QuizQuestion!]! @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizQuestionResolver@storeMany")
+  updateQuizQuestion(id: ID!, question: String!, option_a: String!, option_b: String!, option_c: String!, option_d: String!, correct_answer: String!): QuizQuestion @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizQuestionResolver@update")
+  deleteQuizQuestion(id: ID!): Boolean @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizQuestionResolver@delete")
 
   # Student - Enrollment
   enrollCourse(course_id: ID!): Enrollment @field(resolver: "App\\GraphQL\\Resolvers\\Student\\EnrollmentResolver@enroll")
