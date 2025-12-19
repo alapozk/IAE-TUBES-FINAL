@@ -109,9 +109,11 @@
                       <div class="mat-title" x-text="a.title"></div>
                       <div class="mat-meta">
                         <span class="badge" style="background:#e9d5ff;color:#6b21a8">TUGAS</span>
+                        <span class="badge" style="background:#dbeafe;color:#1e40af" x-text="(a.submissions_count || 0) + ' Submission'"></span>
                         <span style="margin-left:8px" x-text="'Deadline ' + (a.due_at ? formatDate(a.due_at) : '-')"></span>
                       </div>
                       <div class="mat-actions">
+                        <a class="btn-xs" :href="'/teacher/courses/' + course.id + '/assignments/' + a.id + '/submissions'" style="background:#4f46e5;color:#fff">📋 Lihat Submission</a>
                         <a class="btn-xs" :href="'/teacher/courses/' + course.id + '/assignments/' + a.id + '/edit'">✏️ Edit</a>
                         <button class="btn-xs" @click="deleteAssignment(a.id)">🗑️ Hapus</button>
                       </div>
@@ -143,13 +145,15 @@
                     <span style="font-size:.7rem;padding:4px 8px;border-radius:999px;font-weight:800;color:#fff"
                           :style="'background:' + (quiz.is_published ? '#16a34a' : '#dc2626')"
                           x-text="quiz.is_published ? 'DIBUKA' : 'DISEMBUNYIKAN'"></span>
+                    <span class="badge" style="background:#dbeafe;color:#1e40af" x-text="(quiz.attempts_count || 0) + ' Attempt'"></span>
                   </div>
                   <div style="font-size:.85rem;color:#6b7280;display:flex;gap:14px;flex-wrap:wrap;margin-top:6px">
                     <span x-text="'⏱ ' + (quiz.duration || '-') + ' menit'"></span>
-                    <span x-text="'🔁 ' + quiz.max_attempt + ' attempt'"></span>
+                    <span x-text="'🔁 ' + quiz.max_attempt + ' attempt max'"></span>
                   </div>
                 </div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap">
+                  <a class="btn-xs" :href="'/teacher/courses/' + course.id + '/quizzes/' + quiz.id + '/attempts'" style="background:#4f46e5;color:#fff">📋 Lihat Hasil</a>
                   <a class="btn-xs" :href="'/teacher/courses/' + course.id + '/quizzes/' + quiz.id + '/edit'">⚙️ Kelola</a>
                   <button class="btn-xs" @click="toggleQuiz(quiz.id)" x-text="quiz.is_published ? '🔒 Tutup' : '👁️ Buka'"></button>
                   <button class="btn-xs" style="color:#dc2626" @click="deleteQuiz(quiz.id)">🗑️ Hapus</button>
@@ -186,8 +190,8 @@ function courseShowPage() {
                             code
                             status
                             materials { id title extension created_at }
-                            assignments { id title due_at }
-                            quizzes { id title duration max_attempt is_published deadline }
+                            assignments { id title due_at submissions_count }
+                            quizzes { id title duration max_attempt is_published deadline attempts_count }
                         }
                     }
                 `;

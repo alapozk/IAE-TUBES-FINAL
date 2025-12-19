@@ -73,11 +73,18 @@
                                         Dikumpulkan: <span x-text="formatDate(mySubmission.created_at)"></span>
                                     </p>
                                 </div>
-                                <a :href="'/storage/' + mySubmission.file_path" 
-                                   target="_blank"
-                                   class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition">
-                                    📥 Download
-                                </a>
+                                <div class="flex items-center gap-2">
+                                    <a :href="'/storage/' + mySubmission.file_path" 
+                                       target="_blank"
+                                       class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition">
+                                        👁️ Lihat
+                                    </a>
+                                    <a :href="'/storage/' + mySubmission.file_path" 
+                                       download
+                                       class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition">
+                                        📥 Download
+                                    </a>
+                                </div>
                             </div>
                         </div>
 

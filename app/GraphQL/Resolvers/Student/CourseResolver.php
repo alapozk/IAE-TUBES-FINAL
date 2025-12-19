@@ -3,7 +3,9 @@
 namespace App\GraphQL\Resolvers\Student;
 
 use App\Models\Course;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CourseResolver
 {
@@ -18,21 +20,29 @@ class CourseResolver
             throw new \Exception('Anda harus login terlebih dahulu.');
         }
 
-        $course = Course::with(['teacher', 'materials', 'assignments', 'quizzes.questions'])
-            ->find($args['id']);
+        // Get course from guru database
+        $course = Course::find($args['id']);
 
         if (!$course) {
             throw new \Exception('Kursus dengan ID ' . $args['id'] . ' tidak ditemukan.');
         }
 
-        // Check enrollment using the student_id pivot
-        $isEnrolled = $course->students()
-            ->where('users.id', $userId)
+        // Check enrollment using direct query to siswa database
+        $isEnrolled = DB::connection('siswa')
+            ->table('enrollments')
+            ->where('course_id', $course->id)
+            ->where('student_id', $userId)
             ->exists();
 
         if (!$isEnrolled) {
-            throw new \Exception('Anda belum terdaftar di kursus ini. (User ID: ' . $userId . ')');
+            throw new \Exception('Anda belum terdaftar di kursus ini.');
         }
+
+        // Get teacher from main database
+        $course->teacher = User::find($course->teacher_id);
+
+        // Load materials, assignments, quizzes (from guru database)
+        $course->load(['materials', 'assignments', 'quizzes.questions']);
 
         return $course;
     }

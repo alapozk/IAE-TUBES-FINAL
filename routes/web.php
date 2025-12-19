@@ -145,6 +145,15 @@ Route::middleware(['auth', RoleMiddleware::class . ':teacher'])
             ->name('teacher.quiz.questions.create');
         Route::post('/quizzes/{quiz}/questions', [QuizQuestionController::class, 'store'])
             ->name('teacher.quiz.questions.store');
+
+        // ===== View Submissions & Attempts =====
+        Route::get('/courses/{course}/assignments/{assignment}/submissions', function($course, $assignment) {
+            return view('teacher.assignment-submissions', compact('course', 'assignment'));
+        })->name('teacher.assignments.submissions');
+        
+        Route::get('/courses/{course}/quizzes/{quiz}/attempts', function($course, $quiz) {
+            return view('teacher.quiz-attempts', compact('course', 'quiz'));
+        })->name('teacher.quizzes.attempts');
     });
 
 /*

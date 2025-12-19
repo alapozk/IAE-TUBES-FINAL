@@ -1,0 +1,46 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+docker-compose.yml
+docker-compose.override.yml
+Dockerfile
+.dockerignore
+docker/
+
+# Development
+.env
+.env.local
+.env.*.local
+.idea
+.vscode
+*.log
+
+# Dependencies (will be installed during build)
+/node_modules
+/vendor
+
+# Build artifacts
+/public/hot
+/public/storage
+/storage/*.key
+/storage/logs/*
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+
+# Testing
+/coverage
+.phpunit.result.cache
+phpunit.xml
+
+# Documentation
+README.md
+CHANGELOG.md
+docs/
+
+# OS files
+.DS_Store
+Thumbs.db

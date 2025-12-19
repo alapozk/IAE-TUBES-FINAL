@@ -53,6 +53,9 @@
     <!-- Success Alert -->
     <div class="alert alert-success" x-show="success" x-text="success"></div>
 
+    <!-- Error Alert -->
+    <div style="background:#fee2e2;color:#991b1b;padding:16px;border-radius:12px;margin-bottom:20px" x-show="error" x-text="error"></div>
+
     <!-- Courses Grid -->
     <div class="courses-grid" x-show="!loading">
       <template x-for="course in filteredCourses" :key="course.id">
@@ -95,6 +98,7 @@ function catalogPage() {
         loading: true,
         enrollingId: null,
         success: null,
+        error: null,
 
         async loadCourses() {
             try {

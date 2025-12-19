@@ -161,8 +161,8 @@ function quizEditForm() {
                         $id: ID!,
                         $title: String!,
                         $max_attempt: Int!,
-                        $duration: Int!,
-                        $deadline: String,
+                        $duration: Int,
+                        $deadline: DateTime,
                         $show_review: Boolean!,
                         $is_published: Boolean!
                     ) {
@@ -185,8 +185,8 @@ function quizEditForm() {
                     id: this.quizId,
                     title: this.title,
                     max_attempt: parseInt(this.max_attempt),
-                    duration: parseInt(this.duration),
-                    deadline: this.deadline || null,
+                    duration: this.duration ? parseInt(this.duration) : null,
+                    deadline: this.deadline ? this.deadline + ':00' : null,
                     show_review: this.show_review === '1',
                     is_published: this.is_published === '1'
                 });

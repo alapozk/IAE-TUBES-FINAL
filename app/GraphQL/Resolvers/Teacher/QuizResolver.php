@@ -54,8 +54,7 @@ class QuizResolver
             'duration' => $args['duration'] ?? null,
             'deadline' => $args['deadline'] ?? null,
             'show_review' => $args['show_review'],
-            'is_published' => false,
-            'created_by' => Auth::id(),
+            'is_published' => $args['is_published'] ?? false,
         ]);
     }
 

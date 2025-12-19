@@ -4,8 +4,8 @@ namespace App\GraphQL\Resolvers\Student;
 
 use App\Models\Course;
 use App\Models\Material;
-use App\Models\Enrollment;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MaterialResolver
 {
@@ -16,9 +16,11 @@ class MaterialResolver
     {
         $course = Course::findOrFail($args['course_id']);
 
-        // Check enrollment
-        $isEnrolled = $course->students()
-            ->where('users.id', Auth::id())
+        // Check enrollment using direct query to siswa database (cross-database)
+        $isEnrolled = DB::connection('siswa')
+            ->table('enrollments')
+            ->where('course_id', $course->id)
+            ->where('student_id', Auth::id())
             ->exists();
 
         if (!$isEnrolled) {
@@ -35,9 +37,11 @@ class MaterialResolver
     {
         $material = Material::with('course')->findOrFail($args['id']);
         
-        // Check if student is enrolled in the course
-        $isEnrolled = Enrollment::where('student_id', Auth::id())
+        // Check if student is enrolled in the course (cross-database)
+        $isEnrolled = DB::connection('siswa')
+            ->table('enrollments')
             ->where('course_id', $material->course_id)
+            ->where('student_id', Auth::id())
             ->exists();
             
         if (!$isEnrolled) {

@@ -102,14 +102,29 @@
                                 <h3 class="font-medium text-gray-900" x-text="quiz.title"></h3>
                                 <p class="text-xs text-gray-500">
                                     <span x-text="'Durasi: ' + (quiz.duration || '-') + ' menit'"></span> •
-                                    <span x-text="'Kesempatan: ' + quiz.max_attempt + 'x'"></span>
+                                    <span x-text="'Kesempatan: ' + (quiz.my_attempts || 0) + '/' + quiz.max_attempt"></span>
                                 </p>
                             </div>
                         </div>
-                        <a :href="'/student/quiz/' + quiz.id + '/start'"
-                           class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition">
-                            Mulai Quiz
-                        </a>
+                        <div class="flex items-center gap-3">
+                            <!-- Show Score if attempted -->
+                            <template x-if="quiz.my_score !== null && quiz.my_score !== undefined">
+                                <span class="px-3 py-1 bg-green-100 text-green-700 text-sm font-bold rounded-lg"
+                                      x-text="'Skor: ' + quiz.my_score"></span>
+                            </template>
+                            <!-- Button: Mulai atau Habis -->
+                            <template x-if="canAttemptQuiz(quiz)">
+                                <a :href="'/student/quiz/' + quiz.id + '/start'"
+                                   class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition">
+                                    Mulai Quiz
+                                </a>
+                            </template>
+                            <template x-if="!canAttemptQuiz(quiz)">
+                                <span class="px-4 py-2 bg-gray-300 text-gray-600 text-sm font-medium rounded-lg cursor-not-allowed">
+                                    Kesempatan Habis
+                                </span>
+                            </template>
+                        </div>
                     </div>
                 </template>
                 <p x-show="getPublishedQuizzes().length === 0" class="text-gray-500 text-center py-4">Belum ada quiz yang tersedia</p>
@@ -136,6 +151,11 @@ function courseDetailPage() {
         getPublishedQuizzes() {
             if (!this.course || !this.course.quizzes) return [];
             return this.course.quizzes.filter(q => q.is_published);
+        },
+
+        canAttemptQuiz(quiz) {
+            const attempts = quiz.my_attempts || 0;
+            return attempts < quiz.max_attempt;
         },
 
         async loadCourse() {
@@ -172,6 +192,8 @@ function courseDetailPage() {
                                 max_attempt
                                 is_published
                                 deadline
+                                my_attempts
+                                my_score
                             }
                         }
                     }

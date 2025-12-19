@@ -67,18 +67,20 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Quiz Questions table
+        // Quiz Questions table (matches existing structure)
         Schema::connection($this->connection)->create('quiz_questions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('quiz_id')->constrained()->onDelete('cascade');
             $table->text('question');
-            $table->string('type')->default('multiple_choice'); // multiple_choice, true_false, essay
-            $table->integer('points')->default(1);
-            $table->integer('order')->default(0);
+            $table->string('option_a')->nullable();
+            $table->string('option_b')->nullable();
+            $table->string('option_c')->nullable();
+            $table->string('option_d')->nullable();
+            $table->string('correct_answer')->nullable();
             $table->timestamps();
         });
 
-        // Quiz Options table
+        // Quiz Options table (for normalized structure - optional)
         Schema::connection($this->connection)->create('quiz_options', function (Blueprint $table) {
             $table->id();
             $table->foreignId('quiz_question_id')->constrained()->onDelete('cascade');

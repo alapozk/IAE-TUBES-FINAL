@@ -6,6 +6,7 @@ use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\QuizAnswer;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class QuizAttemptResolver
 {
@@ -14,10 +15,10 @@ class QuizAttemptResolver
      */
     public function show($_, array $args)
     {
-        $attempt = QuizAttempt::with(['quiz.questions', 'answers', 'user'])
+        $attempt = QuizAttempt::with(['quiz.questions', 'answers'])
             ->findOrFail($args['id']);
 
-        if ($attempt->user_id !== Auth::id()) {
+        if ($attempt->user_id !== Auth::id() && $attempt->student_id !== Auth::id()) {
             throw new \Exception('Attempt ini bukan milik Anda.');
         }
 
@@ -29,11 +30,13 @@ class QuizAttemptResolver
      */
     public function start($_, array $args)
     {
-        $quiz = Quiz::with('course')->findOrFail($args['quiz_id']);
+        $quiz = Quiz::with(['course', 'questions'])->findOrFail($args['quiz_id']);
 
-        // Check enrollment
-        $isEnrolled = $quiz->course->students()
-            ->where('users.id', Auth::id())
+        // Check enrollment using direct query to siswa database (cross-database)
+        $isEnrolled = DB::connection('siswa')
+            ->table('enrollments')
+            ->where('course_id', $quiz->course_id)
+            ->where('student_id', Auth::id())
             ->exists();
 
         if (!$isEnrolled) {
@@ -48,7 +51,7 @@ class QuizAttemptResolver
             throw new \Exception('Quiz ini belum memiliki soal.');
         }
 
-        // Check attempt count
+        // Check attempt count from siswa database
         $attemptCount = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('user_id', Auth::id())
             ->count();
@@ -60,6 +63,8 @@ class QuizAttemptResolver
         $attempt = QuizAttempt::create([
             'quiz_id' => $quiz->id,
             'user_id' => Auth::id(),
+            'student_id' => Auth::id(), // Required field in siswa database
+            'started_at' => now(),
         ]);
 
         return $attempt->load(['quiz.questions', 'answers']);

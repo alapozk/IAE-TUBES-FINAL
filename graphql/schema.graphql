@@ -30,6 +30,8 @@ type Course {
   id: ID!
   title: String!
   code: String
+  description: String
+  category: String
   status: String
   teacher_id: ID
   teacher: User
@@ -99,6 +101,7 @@ type Assignment {
   submission_mode: String
   max_points: Int
   submissions: [Submission!]
+  submissions_count: Int @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AssignmentFieldResolver@submissionsCount")
   created_at: DateTime
 }
 
@@ -133,6 +136,9 @@ type Quiz {
   is_published: Boolean!
   questions: [QuizQuestion!]
   attempts: [QuizAttempt!]
+  my_attempts: Int @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizFieldResolver@myAttempts")
+  my_score: Int @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizFieldResolver@myScore")
+  attempts_count: Int @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizFieldResolver@attemptsCount")
   created_at: DateTime
 }
 
@@ -164,6 +170,28 @@ type QuizAnswer {
   quiz_question_id: ID!
   selected_answer: String
   question: QuizQuestion
+}
+
+# Teacher View Types
+type QuizAttemptTeacherView {
+  id: ID!
+  student_id: ID!
+  student_name: String
+  score: Int
+  status: String
+  started_at: DateTime
+  finished_at: DateTime
+}
+
+type SubmissionTeacherView {
+  id: ID!
+  student_id: ID!
+  student_name: String
+  title: String
+  file_path: String
+  grade: Int
+  feedback: String
+  created_at: DateTime
 }
 
 # ============================================================
@@ -213,6 +241,8 @@ type Query {
   teacherAssignment(id: ID!): Assignment @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AssignmentResolver@show")
   teacherQuizzes(course_id: ID!): [Quiz!]! @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@listByCourse")
   teacherQuiz(id: ID!): Quiz @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@show")
+  teacherQuizAttempts(quiz_id: ID!): [QuizAttemptTeacherView!]! @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizAttemptResolver@list")
+  teacherAssignmentSubmissions(assignment_id: ID!): [SubmissionTeacherView!]! @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\SubmissionResolver@list")
 
   # Student
   myEnrollments: [Enrollment!]! @field(resolver: "App\\GraphQL\\Resolvers\\Student\\EnrollmentResolver@myCourses")

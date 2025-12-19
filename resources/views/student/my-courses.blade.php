@@ -46,7 +46,7 @@
 
   .courses-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 25px;
   }
 
@@ -66,7 +66,7 @@
   }
 
   .course-image {
-    height: 180px;
+    height: 120px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     align-items: center;
@@ -75,7 +75,7 @@
   }
 
   .course-content {
-    padding: 25px;
+    padding: 20px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -110,20 +110,78 @@
     font-size: 1.1rem;
     font-weight: 700;
     color: #1a202c;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
   }
 
-  .course-status {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: .8rem;
+  /* Quiz Section */
+  .quizzes-section {
+    margin-bottom: 15px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 15px;
+  }
+  .quizzes-title {
+    font-size: 0.85rem;
     font-weight: 700;
-    width: fit-content;
+    color: #4a5568;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
-
-  .status-active, .status-enrolled {
+  .quiz-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .quiz-info {
+    flex: 1;
+  }
+  .quiz-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a202c;
+  }
+  .quiz-status {
+    font-size: 0.75rem;
+    color: #718096;
+  }
+  .quiz-score {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .score-completed {
     background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+    color: #065f46;
+  }
+  .score-pending {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .score-full {
+    background: #fecaca;
+    color: #991b1b;
+  }
+  .quiz-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .quiz-btn:hover {
+    opacity: 0.9;
+  }
+  .quiz-btn-disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
   }
 
   .course-footer {
@@ -191,7 +249,33 @@
 
             <h3 class="course-title" x-text="enrollment.course.title"></h3>
 
-            <span class="course-status status-enrolled">✓ Sedang Belajar</span>
+            <!-- Quiz Section -->
+            <div class="quizzes-section" x-show="enrollment.course.quizzes && enrollment.course.quizzes.length > 0">
+              <div class="quizzes-title">🧠 Quiz</div>
+              <template x-for="quiz in enrollment.course.quizzes" :key="quiz.id">
+                <div class="quiz-item">
+                  <div class="quiz-info">
+                    <div class="quiz-name" x-text="quiz.title"></div>
+                    <div class="quiz-status">
+                      <span x-text="'Attempt: ' + (quiz.my_attempts || 0) + '/' + quiz.max_attempt"></span>
+                    </div>
+                  </div>
+                  <!-- Score or Button -->
+                  <template x-if="quiz.my_score !== null && quiz.my_score !== undefined">
+                    <span class="quiz-score score-completed" x-text="'Skor: ' + quiz.my_score"></span>
+                  </template>
+                  <template x-if="quiz.my_score === null || quiz.my_score === undefined">
+                    <template x-if="(quiz.my_attempts || 0) < quiz.max_attempt && quiz.is_published">
+                      <a :href="'/student/quiz/' + quiz.id + '/start'" class="quiz-btn">Mulai</a>
+                    </template>
+                    <template x-if="(quiz.my_attempts || 0) >= quiz.max_attempt || !quiz.is_published">
+                      <span class="quiz-score" :class="quiz.is_published ? 'score-full' : 'score-pending'" 
+                            x-text="quiz.is_published ? 'Habis' : 'Belum Dibuka'"></span>
+                    </template>
+                  </template>
+                </div>
+              </template>
+            </div>
 
             <div class="course-footer">
               <a :href="'/student/courses/' + enrollment.course.id" class="course-btn">
@@ -232,6 +316,14 @@ function myCoursesPage() {
                                 id
                                 title
                                 code
+                                quizzes {
+                                    id
+                                    title
+                                    max_attempt
+                                    is_published
+                                    my_attempts
+                                    my_score
+                                }
                             }
                         }
                     }

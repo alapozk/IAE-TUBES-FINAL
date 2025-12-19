@@ -70,7 +70,7 @@
             <span x-show="!saving">💾</span>
             <span x-text="saving ? 'Menyimpan...' : 'Simpan Perubahan'"></span>
           </button>
-          <a href="{{ route('teacher.courses') }}" class="btn btn-secondary">← Batal</a>
+          <a :href="'/teacher/courses/' + courseId" class="btn btn-secondary">← Kembali ke Kursus</a>
         </div>
       </form>
     </div>

@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Assignment;
 use App\Models\Submission;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SubmissionResolver
 {
@@ -17,9 +18,11 @@ class SubmissionResolver
         $course = Course::findOrFail($args['course_id']);
         $assignment = Assignment::findOrFail($args['assignment_id']);
 
-        // Check enrollment
-        $isEnrolled = $course->students()
-            ->where('users.id', Auth::id())
+        // Check enrollment using direct query to siswa database (cross-database)
+        $isEnrolled = DB::connection('siswa')
+            ->table('enrollments')
+            ->where('course_id', $course->id)
+            ->where('student_id', Auth::id())
             ->exists();
 
         if (!$isEnrolled) {

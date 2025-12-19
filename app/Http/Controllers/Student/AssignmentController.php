@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AssignmentController extends Controller
 {
@@ -16,8 +17,10 @@ class AssignmentController extends Controller
     {
         $student = auth()->user();
 
-        // Ambil semua course_id yang diikuti student
-        $courseIds = $student->enrollments()
+        // Ambil semua course_id yang diikuti student dari siswa database
+        $courseIds = DB::connection('siswa')
+            ->table('enrollments')
+            ->where('student_id', auth()->id())
             ->pluck('course_id');
 
         // Ambil semua assignment dari course tersebut
@@ -53,12 +56,14 @@ class AssignmentController extends Controller
     }
 
     /**
-     * Validasi enrolment student
+     * Validasi enrolment student (cross-database compatible)
      */
     private function ensureEnrolled(Course $course)
     {
-        $isEnrolled = $course->students()
-            ->where('users.id', auth()->id())
+        $isEnrolled = DB::connection('siswa')
+            ->table('enrollments')
+            ->where('course_id', $course->id)
+            ->where('student_id', auth()->id())
             ->exists();
 
         abort_if(!$isEnrolled, 403, 'Anda belum terdaftar pada kursus ini.');
