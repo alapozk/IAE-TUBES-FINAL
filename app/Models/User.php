@@ -28,12 +28,8 @@ class User extends Authenticatable {
         return $this->belongsToMany(
             Course::class,
             'enrollments',   // nama tabel pivot
-            'student_id',        // FK ke users
-            'course_id',
-            'enrollments'          
+            'student_id',    // FK ke users
+            'course_id'      // FK ke courses
         );
     }
 }
-
-
-

@@ -11,4 +11,22 @@ class QuizAnswer extends Model
         'quiz_question_id',
         'quiz_option_id'
     ];
+
+    /**
+     * Relasi ke option yang dipilih
+     */
+    public function option()
+    {
+        return $this->belongsTo(QuizOption::class, 'quiz_option_id');
+    }
+
+    public function question()
+    {
+        return $this->belongsTo(QuizQuestion::class, 'quiz_question_id');
+    }
+
+    public function attempt()
+    {
+        return $this->belongsTo(QuizAttempt::class, 'quiz_attempt_id');
+    }
 }

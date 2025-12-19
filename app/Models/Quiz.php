@@ -28,6 +28,7 @@ class Quiz extends Model
      */
     protected $casts = [
         'is_published' => 'boolean',
+        'deadline' => 'datetime',
     ];
 
     /**
