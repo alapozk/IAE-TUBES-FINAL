@@ -109,6 +109,66 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | Multi-Database Connections (Guru, Siswa, Admin)
+        |--------------------------------------------------------------------------
+        */
+
+        // Database Guru - courses, materials, assignments, quizzes
+        'guru' => [
+            'driver' => 'mysql',
+            'url' => env('DB_GURU_URL'),
+            'host' => env('DB_GURU_HOST', '127.0.0.1'),
+            'port' => env('DB_GURU_PORT', '3306'),
+            'database' => env('DB_GURU_DATABASE', 'lms_guru'),
+            'username' => env('DB_GURU_USERNAME', 'root'),
+            'password' => env('DB_GURU_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
+        // Database Siswa - enrollments, submissions, quiz_attempts
+        'siswa' => [
+            'driver' => 'mysql',
+            'url' => env('DB_SISWA_URL'),
+            'host' => env('DB_SISWA_HOST', '127.0.0.1'),
+            'port' => env('DB_SISWA_PORT', '3306'),
+            'database' => env('DB_SISWA_DATABASE', 'lms_siswa'),
+            'username' => env('DB_SISWA_USERNAME', 'root'),
+            'password' => env('DB_SISWA_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
+        // Database Admin - logs, settings, audit
+        'admin' => [
+            'driver' => 'mysql',
+            'url' => env('DB_ADMIN_URL'),
+            'host' => env('DB_ADMIN_HOST', '127.0.0.1'),
+            'port' => env('DB_ADMIN_PORT', '3306'),
+            'database' => env('DB_ADMIN_DATABASE', 'lms_admin'),
+            'username' => env('DB_ADMIN_USERNAME', 'root'),
+            'password' => env('DB_ADMIN_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
     ],
 
     /*

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Material extends Model
 {
+    protected $connection = 'guru';
+    
     protected $fillable = ['course_id','title','description','file_path','mime','size','extension'];
 
     public function course(){

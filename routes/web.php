@@ -11,6 +11,16 @@ use App\Http\Controllers\{
     ProfileController
 };
 
+// DEBUG: Test course query
+Route::get('/debug-courses', function() {
+    $courses = \App\Models\Course::all();
+    return response()->json([
+        'count' => $courses->count(),
+        'courses' => $courses->toArray(),
+        'connection' => (new \App\Models\Course)->getConnectionName()
+    ]);
+});
+
 // Admin
 use App\Http\Controllers\Admin\UserController as AdminUser;
 

@@ -3,7 +3,9 @@
 namespace App\GraphQL\Resolvers\Admin;
 
 use App\Models\Course;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CourseResolver
 {
@@ -13,16 +15,28 @@ class CourseResolver
     public function list($_, array $args)
     {
         // Verify admin role
-        if (Auth::user()->role !== 'admin') {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
             throw new \Exception('Unauthorized. Admin access required.');
         }
 
-        return Course::with(['teacher', 'enrollments'])
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($course) {
-                $course->student_count = $course->enrollments->count();
-                return $course;
-            });
+        try {
+            $courses = Course::orderBy('created_at', 'desc')->get();
+            
+            // Add teacher and student_count
+            foreach ($courses as $course) {
+                // Get teacher from main database
+                $course->teacher = User::find($course->teacher_id);
+                
+                // Get student count from siswa database
+                $course->student_count = DB::connection('siswa')
+                    ->table('enrollments')
+                    ->where('course_id', $course->id)
+                    ->count();
+            }
+            
+            return $courses;
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 }

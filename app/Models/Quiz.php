@@ -9,6 +9,8 @@ class Quiz extends Model
 {
     use HasFactory;
 
+    protected $connection = 'guru';
+
     /**
      * Kolom yang boleh diisi (mass assignment)
      */

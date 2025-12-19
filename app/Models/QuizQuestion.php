@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuizQuestion extends Model
 {
+    protected $connection = 'guru';
+    
     protected $fillable = [
         'quiz_id',
         'question',

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuizAttempt extends Model
 {
+    protected $connection = 'siswa';
+    
     protected $fillable = ['quiz_id', 'user_id', 'score'];
 
     public function answers()

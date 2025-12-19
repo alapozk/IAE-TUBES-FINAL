@@ -104,15 +104,18 @@ function catalogPage() {
                             id
                             title
                             description
-                            category
+                            status
                         }
                     }
                 `;
                 const result = await GraphQL.query(query);
+                console.log('GraphQL result:', result);
                 this.courses = result.publicCourses || [];
                 this.filteredCourses = this.courses;
+                console.log('Courses loaded:', this.courses.length);
             } catch (e) {
                 console.error('Failed to load courses:', e);
+                this.error = e.message;
             } finally {
                 this.loading = false;
             }

@@ -9,6 +9,12 @@ class Course extends Model
 {
     use HasFactory;
 
+    /**
+     * Database connection for this model
+     * Uses 'guru' database for multi-database architecture
+     */
+    protected $connection = 'guru';
+
     protected $fillable = [
         'title',
         'code',

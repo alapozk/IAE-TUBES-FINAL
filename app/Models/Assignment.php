@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Assignment extends Model
 {
+    protected $connection = 'guru';
+    
     protected $fillable = [
         'course_id',
         'title',

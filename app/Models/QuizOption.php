@@ -6,5 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuizOption extends Model
 {
+    protected $connection = 'guru';
+    
     protected $fillable = ['quiz_question_id', 'option_text', 'is_correct'];
 }

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Submission extends Model
 {
+    protected $connection = 'siswa';
+    
     protected $fillable = [
         'course_id',
         'assignment_id',
