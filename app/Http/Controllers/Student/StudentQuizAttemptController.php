@@ -30,7 +30,7 @@ class StudentQuizAttemptController extends Controller
         $course = $quiz->course;
 
         abort_if(
-            !$course->students()->where('user_id', auth()->id())->exists(),
+            !$course->students()->where('users.id', auth()->id())->exists(),
             403,
             'Anda belum terdaftar pada kursus ini.'
         );

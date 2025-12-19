@@ -357,35 +357,33 @@
             </div>
 
             <!-- Right: Form -->
-            <div class="register-form-side">
+            <div class="register-form-side" x-data="registerForm()">
                 <div class="card-header">
                     <h2>{{ __('Daftar') }}</h2>
                     <p>Buat akun baru untuk memulai</p>
                 </div>
 
-                <form method="POST" action="{{ route('register') }}">
-                    @csrf
+                <!-- Error Alert -->
+                <template x-if="error">
+                    <div class="alert-box alert-error">
+                        <span>✕</span>
+                        <span x-text="error"></span>
+                    </div>
+                </template>
 
+                <form @submit.prevent="submitRegister">
                     <!-- Name -->
                     <div class="form-group">
                         <label for="name" class="form-label">{{ __('Nama Lengkap') }}</label>
                         <input 
                             id="name" 
                             type="text" 
-                            name="name" 
+                            x-model="name"
                             class="form-input"
-                            value="{{ old('name') }}"
                             placeholder="Masukkan nama lengkap Anda"
                             required 
                             autofocus 
-                            autocomplete="name" 
                         />
-                        @error('name')
-                            <div class="form-error">
-                                <span>✕</span>
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
                     </div>
 
                     <!-- Email Address -->
@@ -394,19 +392,11 @@
                         <input 
                             id="email" 
                             type="email" 
-                            name="email" 
+                            x-model="email"
                             class="form-input"
-                            value="{{ old('email') }}"
                             placeholder="nama@email.com"
                             required 
-                            autocomplete="username" 
                         />
-                        @error('email')
-                            <div class="form-error">
-                                <span>✕</span>
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
                     </div>
 
                     <!-- Password -->
@@ -415,18 +405,11 @@
                         <input 
                             id="password" 
                             type="password" 
-                            name="password" 
+                            x-model="password"
                             class="form-input"
                             placeholder="••••••••"
                             required 
-                            autocomplete="new-password" 
                         />
-                        @error('password')
-                            <div class="form-error">
-                                <span>✕</span>
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
                     </div>
 
                     <!-- Confirm Password -->
@@ -435,18 +418,11 @@
                         <input 
                             id="password_confirmation" 
                             type="password" 
-                            name="password_confirmation" 
+                            x-model="password_confirmation"
                             class="form-input"
                             placeholder="••••••••"
                             required 
-                            autocomplete="new-password" 
                         />
-                        @error('password_confirmation')
-                            <div class="form-error">
-                                <span>✕</span>
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
                     </div>
 
                     <!-- Footer Actions -->
@@ -454,8 +430,9 @@
                         <a class="login-link" href="{{ route('login') }}">
                             {{ __('Sudah punya akun? Masuk') }}
                         </a>
-                        <button type="submit" class="register-btn">
-                            {{ __('Daftar') }}
+                        <button type="submit" class="register-btn" :disabled="loading">
+                            <span x-show="!loading">{{ __('Daftar') }}</span>
+                            <span x-show="loading">Memproses...</span>
                         </button>
                     </div>
                 </form>
@@ -463,5 +440,56 @@
 
         </div>
     </div>
+
+    <script>
+    function registerForm() {
+        return {
+            name: '',
+            email: '',
+            password: '',
+            password_confirmation: '',
+            loading: false,
+            error: null,
+
+            async submitRegister() {
+                this.loading = true;
+                this.error = null;
+
+                if (this.password !== this.password_confirmation) {
+                    this.error = 'Password dan konfirmasi password tidak cocok.';
+                    this.loading = false;
+                    return;
+                }
+
+                try {
+                    const mutation = `
+                        mutation Register($name: String!, $email: String!, $password: String!, $password_confirmation: String!) {
+                            register(name: $name, email: $email, password: $password, password_confirmation: $password_confirmation) {
+                                user { id name email role }
+                                message
+                            }
+                        }
+                    `;
+
+                    const result = await GraphQL.mutate(mutation, {
+                        name: this.name,
+                        email: this.email,
+                        password: this.password,
+                        password_confirmation: this.password_confirmation
+                    });
+
+                    if (result && result.register && result.register.user) {
+                        // Redirect to student dashboard (default role)
+                        window.location.href = '/student/my-courses';
+                    }
+                } catch (e) {
+                    this.error = e.message || 'Registrasi gagal. Silakan coba lagi.';
+                } finally {
+                    this.loading = false;
+                }
+            }
+        }
+    }
+    </script>
 
 </x-guest-layout>

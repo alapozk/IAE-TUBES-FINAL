@@ -12,7 +12,6 @@
 
   .courses-container { max-width: 1200px; margin: 0 auto; }
 
-  /* Header */
   .courses-header { margin-bottom: 40px; }
   .header-top {
     display: flex;
@@ -33,7 +32,6 @@
   }
 
   .header-icon { font-size: 2.5rem; }
-
   .header-content p { color: #718096; }
 
   .tasks-btn {
@@ -46,7 +44,6 @@
     box-shadow: 0 4px 12px rgba(79,70,229,.35);
   }
 
-  /* Grid */
   .courses-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -84,7 +81,6 @@
     flex-direction: column;
   }
 
-  /* ====== BAGIAN BARU (HASIL RAPING SS) ====== */
   .course-meta {
     display: flex;
     align-items: center;
@@ -109,7 +105,6 @@
     background: #e6fffa;
     color: #065f46;
   }
-  /* ========================================= */
 
   .course-title {
     font-size: 1.1rem;
@@ -126,7 +121,7 @@
     width: fit-content;
   }
 
-  .status-active {
+  .status-active, .status-enrolled {
     background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
     color: white;
   }
@@ -147,12 +142,24 @@
     text-decoration: none;
     font-weight: 600;
   }
+
+  .loading-state, .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #718096;
+  }
+
+  .empty-state {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+  }
 </style>
 
-<div class="courses-wrapper">
+<div class="courses-wrapper" x-data="myCoursesPage()" x-init="loadEnrollments()">
   <div class="courses-container">
 
-    {{-- Header --}}
+    <!-- Header -->
     <div class="courses-header">
       <div class="header-top">
         <div class="header-content">
@@ -163,48 +170,81 @@
       </div>
     </div>
 
-    {{-- Courses --}}
-    @if($enrolled->count())
-      <div class="courses-grid">
-        @foreach($enrolled as $enrollment)
-          <div class="course-card">
+    <!-- Loading State -->
+    <template x-if="loading">
+      <div class="loading-state">
+        <p>Memuat kursus...</p>
+      </div>
+    </template>
 
-            <div class="course-image">📖</div>
+    <!-- Courses Grid -->
+    <div class="courses-grid" x-show="!loading && enrollments.length > 0">
+      <template x-for="enrollment in enrollments" :key="enrollment.id">
+        <div class="course-card">
+          <div class="course-image">📖</div>
 
-            <div class="course-content">
+          <div class="course-content">
+            <div class="course-meta">
+              <span class="course-code" x-text="'#' + enrollment.course.id"></span>
+              <span class="enrolled-badge">✓ Enrolled</span>
+            </div>
 
-              {{-- === HASIL RAPING DARI SS === --}}
-              <div class="course-meta">
-                <span class="course-code">
-                  #{{ $enrollment->course->id }}
-                </span>
-                <span class="enrolled-badge">
-                  ✓ Enrolled
-                </span>
-              </div>
-              {{-- =========================== --}}
+            <h3 class="course-title" x-text="enrollment.course.title"></h3>
 
-              <h3 class="course-title">
-                {{ $enrollment->course->title }}
-              </h3>
+            <span class="course-status status-enrolled">✓ Sedang Belajar</span>
 
-              <span class="course-status status-{{ $enrollment->status }}">
-                ✓ Sedang Belajar
-              </span>
-
-              <div class="course-footer">
-                <a href="{{ route('courses.show', $enrollment->course) }}"
-                   class="course-btn">
-                  Lihat Kursus
-                </a>
-              </div>
-
+            <div class="course-footer">
+              <a :href="'/student/courses/' + enrollment.course.id" class="course-btn">
+                Lihat Kursus
+              </a>
             </div>
           </div>
-        @endforeach
+        </div>
+      </template>
+    </div>
+
+    <!-- Empty State -->
+    <template x-if="!loading && enrollments.length === 0">
+      <div class="empty-state">
+        <h3>Belum Ada Kursus</h3>
+        <p>Anda belum terdaftar di kursus manapun.</p>
+        <a href="{{ route('courses.catalog') }}" class="course-btn" style="display:inline-block;margin-top:15px">Cari Kursus</a>
       </div>
-    @endif
+    </template>
 
   </div>
 </div>
+
+<script>
+function myCoursesPage() {
+    return {
+        enrollments: [],
+        loading: true,
+
+        async loadEnrollments() {
+            try {
+                const query = `
+                    query {
+                        myEnrollments {
+                            id
+                            status
+                            course {
+                                id
+                                title
+                                code
+                            }
+                        }
+                    }
+                `;
+                const result = await GraphQL.query(query);
+                this.enrollments = result.myEnrollments || [];
+            } catch (e) {
+                console.error('Error loading enrollments:', e);
+            } finally {
+                this.loading = false;
+            }
+        }
+    }
+}
+</script>
 @endsection

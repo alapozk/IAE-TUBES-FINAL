@@ -24,6 +24,7 @@ class MaterialController extends Controller
 
         $data = $r->validate([
             'title' => ['required','string','max:255'],
+            'description' => ['nullable','string'],
             'file'  => [
                 'required','file','max:51200', // 50MB
                 // pdf, powerpoint, video umum
@@ -36,12 +37,13 @@ class MaterialController extends Controller
         $path = $file->store("materials/{$course->id}", 'public');
 
         $material = Material::create([
-            'course_id' => $course->id,
-            'title'     => $data['title'],
-            'file_path' => $path,
-            'mime'      => $file->getMimeType(),
-            'size'      => $file->getSize(),
-            'extension' => $ext,
+            'course_id'   => $course->id,
+            'title'       => $data['title'],
+            'description' => $data['description'] ?? null,
+            'file_path'   => $path,
+            'mime'        => $file->getMimeType(),
+            'size'        => $file->getSize(),
+            'extension'   => $ext,
         ]);
 
         return redirect()->route('teacher.courses.show', $course)->with('ok','Materi berhasil diunggah.');
@@ -65,13 +67,17 @@ class MaterialController extends Controller
 
         $data = $r->validate([
             'title' => ['required','string','max:255'],
+            'description' => ['nullable','string'],
             'file'  => [
                 'nullable','file','max:51200',
                 'mimetypes:application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint.presentation.macroEnabled.12,video/mp4,video/webm,video/quicktime,video/x-matroska'
             ],
         ]);
 
-        $update = ['title' => $data['title']];
+        $update = [
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+        ];
 
         if ($r->hasFile('file')) {
             // hapus file lama

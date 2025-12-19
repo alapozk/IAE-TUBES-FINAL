@@ -13,53 +13,50 @@
   }
   textarea{min-height:160px; resize:vertical}
   .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-  .btn{padding:10px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#f9fafb;font-weight:800;text-decoration:none}
+  .btn{padding:10px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#f9fafb;font-weight:800;text-decoration:none;cursor:pointer}
   .primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none}
+  .primary:disabled{opacity:0.6;cursor:not-allowed}
+  .alert{padding:12px;border-radius:10px;margin-bottom:12px}
+  .alert-error{background:#fee2e2;color:#991b1b}
+  .alert-success{background:#d1fae5;color:#065f46}
 </style>
 
-<div class="wrap">
+<div class="wrap" x-data="assignmentCreateForm()">
   <div class="container">
-    <a href="{{ route('teacher.courses.show',$course) }}" class="btn">← Kembali</a>
+    <a :href="'/teacher/courses/' + courseId" class="btn">← Kembali</a>
 
     <div class="card" style="margin-top:12px">
-      <h2 style="font-weight:900;margin:0 0 10px">Buat Tugas — {{ $course->title }}</h2>
+      <h2 style="font-weight:900;margin:0 0 10px">📝 Buat Tugas Baru</h2>
 
-      @if ($errors->any())
-        <div style="background:#fee2e2;border:1px solid #fecaca;padding:10px;border-radius:10px;margin-bottom:10px">
-          <b>Periksa form:</b>
-          <ul style="margin:6px 0 0 18px">
-            @foreach($errors->all() as $e) <li>{{ $e }}</li> @endforeach
-          </ul>
-        </div>
-      @endif
+      <!-- Alerts -->
+      <div class="alert alert-error" x-show="error" x-text="error"></div>
+      <div class="alert alert-success" x-show="success" x-text="success"></div>
 
-      <form method="POST" action="{{ route('teacher.assignments.store',$course) }}">
-        @csrf
-
+      <form @submit.prevent="submitForm">
         <div class="row-1">
           <div>
             <label>Judul</label>
-            <input type="text" name="title" value="{{ old('title') }}" required placeholder="Contoh: Esai Bab 1">
+            <input type="text" x-model="title" required placeholder="Contoh: Esai Bab 1">
           </div>
 
           <div>
             <label>Instruksi / Detail Tugas</label>
-            <textarea name="instructions" placeholder="Tuliskan kriteria penilaian, langkah, sumber, dsb.">{{ old('instructions') }}</textarea>
+            <textarea x-model="instructions" placeholder="Tuliskan kriteria penilaian, langkah, sumber, dsb."></textarea>
           </div>
         </div>
 
         <div class="row" style="margin-top:6px">
           <div>
             <label>Deadline (opsional)</label>
-            <input type="datetime-local" name="due_at" value="{{ old('due_at') }}">
+            <input type="datetime-local" x-model="due_at">
           </div>
 
           <div>
             <label>Mode Pengumpulan</label>
-            <select name="submission_mode" required>
-              <option value="text"  {{ old('submission_mode')==='text'  ? 'selected':'' }}>Teks saja</option>
-              <option value="file"  {{ old('submission_mode')==='file'  ? 'selected':'' }}>File saja (PDF/DOC/ZIP)</option>
-              <option value="both"  {{ old('submission_mode')==='both'  ? 'selected':'' }}>Teks + File</option>
+            <select x-model="submission_mode" required>
+              <option value="text">Teks saja</option>
+              <option value="file">File saja (PDF/DOC/ZIP)</option>
+              <option value="both">Teks + File</option>
             </select>
           </div>
         </div>
@@ -67,17 +64,87 @@
         <div class="row" style="margin-top:6px">
           <div>
             <label>Skor Maks (opsional)</label>
-            <input type="text" name="max_points" inputmode="numeric" value="{{ old('max_points') }}" placeholder="Mis. 100">
+            <input type="text" x-model="max_points" inputmode="numeric" placeholder="Mis. 100">
           </div>
           <div></div>
         </div>
 
         <div class="actions">
-          <button class="btn primary" type="submit">Simpan</button>
-          <a class="btn" href="{{ route('teacher.courses.show',$course) }}">Batal</a>
+          <button class="btn primary" type="submit" :disabled="loading">
+            <span x-text="loading ? '⏳ Menyimpan...' : '💾 Simpan'"></span>
+          </button>
+          <a class="btn" :href="'/teacher/courses/' + courseId">Batal</a>
         </div>
       </form>
     </div>
   </div>
 </div>
+
+<script>
+function assignmentCreateForm() {
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    // URL: /teacher/courses/{courseId}/assignments/create
+    const courseId = pathParts[2];
+
+    return {
+        courseId: courseId,
+        title: '',
+        instructions: '',
+        due_at: '',
+        submission_mode: 'file',
+        max_points: '',
+        loading: false,
+        error: null,
+        success: null,
+
+        async submitForm() {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const mutation = `
+                    mutation CreateAssignment(
+                        $course_id: ID!,
+                        $title: String!,
+                        $instructions: String,
+                        $due_at: DateTime,
+                        $submission_mode: String!,
+                        $max_points: Int
+                    ) {
+                        createAssignment(
+                            course_id: $course_id,
+                            title: $title,
+                            instructions: $instructions,
+                            due_at: $due_at,
+                            submission_mode: $submission_mode,
+                            max_points: $max_points
+                        ) {
+                            id
+                            title
+                        }
+                    }
+                `;
+
+                await GraphQL.mutate(mutation, {
+                    course_id: this.courseId,
+                    title: this.title,
+                    instructions: this.instructions || null,
+                    due_at: this.due_at || null,
+                    submission_mode: this.submission_mode,
+                    max_points: this.max_points ? parseInt(this.max_points) : null
+                });
+
+                this.success = 'Tugas berhasil dibuat!';
+                setTimeout(() => {
+                    window.location.href = '/teacher/courses/' + this.courseId;
+                }, 1000);
+            } catch (e) {
+                this.error = e.message || 'Gagal membuat tugas';
+            } finally {
+                this.loading = false;
+            }
+        }
+    }
+}
+</script>
 @endsection

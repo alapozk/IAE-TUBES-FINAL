@@ -12,7 +12,6 @@
   .create-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;text-decoration:none;border-radius:10px;font-weight:700;box-shadow:0 4px 15px rgba(102,126,234,.4)}
   .create-btn:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(102,126,234,.6)}
 
-  /* GRID (satu-satunya deklarasi) */
   .courses-grid{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
@@ -34,7 +33,7 @@
 
   .course-footer{display:flex;justify-content:center;gap:12px;margin-top:auto;padding:14px 0 18px;border-top:1px solid #e2e8f0}
   .course-btn{min-width:110px;text-align:center;padding:10px 16px;border:none;border-radius:10px;font-weight:600;font-size:.9rem;cursor:pointer;transition:.3s}
-  .btn-view{background:#f7fafc;color:#1a202c;border:1px solid #e2e8f0;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 2px 4px rgba(0,0,0,.04)}
+  .btn-view{background:#f7fafc;color:#1a202c;border:1px solid #e2e8f0;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 2px 4px rgba(0,0,0,.04);text-decoration:none}
   .btn-view:hover{background:#edf2f7;transform:translateY(-2px)}
   .btn-delete{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;display:inline-flex;align-items:center;justify-content:center;gap:6px}
   .btn-delete:hover{background:#fecaca;transform:translateY(-2px)}
@@ -43,6 +42,8 @@
   .empty-icon{font-size:4rem;margin-bottom:20px}
   .empty-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;text-decoration:none;border-radius:8px;font-weight:700}
   .empty-btn:hover{transform:translateY(-2px)}
+
+  .loading-state{text-align:center;padding:60px 20px;color:#718096}
 
   @keyframes shimmer{0%{left:-100%}100%{left:100%}}
 
@@ -55,7 +56,7 @@
   }
 </style>
 
-<div class="courses-wrapper">
+<div class="courses-wrapper" x-data="coursesPage()" x-init="loadCourses()">
   <div class="courses-container">
 
     <div class="courses-header">
@@ -65,42 +66,92 @@
       <a href="{{ route('teacher.courses.create') }}" class="create-btn"><span>+</span><span>Buat Kursus</span></a>
     </div>
 
-    {{-- GRID membungkus seluruh loop --}}
-    <div class="courses-grid">
-      @forelse($courses as $course)
+    <!-- Loading State -->
+    <template x-if="loading">
+      <div class="loading-state">
+        <p>Memuat kursus...</p>
+      </div>
+    </template>
+
+    <!-- Courses Grid -->
+    <div class="courses-grid" x-show="!loading">
+      <template x-for="course in courses" :key="course.id">
         <div class="course-card">
           <div class="course-image">📖</div>
 
           <div class="course-content">
-            <h3 class="course-title">{{ $course->title }}</h3>
-            <span class="course-status status-{{ $course->status }}">
-              @if($course->status==='draft') 📝 Draft
-              @elseif($course->status==='published') ✓ Dipublikasikan
-              @elseif($course->status==='archived') 📦 Diarsipkan
-              @else {{ ucfirst($course->status) }}
-              @endif
+            <h3 class="course-title" x-text="course.title"></h3>
+            <span class="course-status" 
+                  :class="'status-' + course.status"
+                  x-text="course.status === 'draft' ? '📝 Draft' : (course.status === 'published' ? '✓ Dipublikasikan' : '📦 Diarsipkan')">
             </span>
           </div>
 
           <div class="course-footer">
-            <a href="{{ route('teacher.courses.show',$course) }}" class="course-btn btn-view">👁️ View</a>
-            <form method="POST" action="{{ route('teacher.courses.destroy',$course) }}">
-              @csrf @method('DELETE')
-              <button type="submit" class="course-btn btn-delete" onclick="return confirm('Hapus kursus ini?')">🗑️ Hapus</button>
-            </form>
+            <a :href="'/teacher/courses/' + course.id" class="course-btn btn-view">👁️ View</a>
+            <button @click="deleteCourse(course.id)" class="course-btn btn-delete">🗑️ Hapus</button>
           </div>
         </div>
-      @empty
-        {{-- span penuh lebar grid saat kosong --}}
+      </template>
+
+      <!-- Empty State -->
+      <template x-if="!loading && courses.length === 0">
         <div class="empty-state" style="grid-column:1 / -1">
           <div class="empty-icon">📚</div>
           <h3>Belum Ada Kursus</h3>
           <p>Anda belum membuat kursus apapun. Mulai buat kursus pertama Anda sekarang!</p>
           <a href="{{ route('teacher.courses.create') }}" class="empty-btn"><span>+</span><span>Buat Kursus Baru</span></a>
         </div>
-      @endforelse
+      </template>
     </div>
 
   </div>
 </div>
+
+<script>
+function coursesPage() {
+    return {
+        courses: [],
+        loading: true,
+
+        async loadCourses() {
+            try {
+                const query = `
+                    query {
+                        teacherCourses {
+                            id
+                            title
+                            code
+                            status
+                        }
+                    }
+                `;
+                const result = await GraphQL.query(query);
+                this.courses = result.teacherCourses || [];
+            } catch (e) {
+                console.error('Error loading courses:', e);
+                alert('Gagal memuat kursus: ' + e.message);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async deleteCourse(id) {
+            if (!confirm('Hapus kursus ini?')) return;
+
+            try {
+                const mutation = `
+                    mutation DeleteCourse($id: ID!) {
+                        deleteCourse(id: $id)
+                    }
+                `;
+                await GraphQL.mutate(mutation, { id: id.toString() });
+                this.courses = this.courses.filter(c => c.id !== id);
+            } catch (e) {
+                alert('Gagal menghapus: ' + e.message);
+            }
+        }
+    }
+}
+</script>
 @endsection

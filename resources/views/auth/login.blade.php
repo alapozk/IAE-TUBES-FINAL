@@ -31,7 +31,7 @@
         }
 
         .login-banner-side::before {
-            content: '';
+            content: ''; 
             position: absolute;
             top: -50%;
             right: -50%;
@@ -365,7 +365,7 @@
             </div>
 
             <!-- Right: Form -->
-            <div class="login-form-side">
+            <div class="login-form-side" x-data="loginForm()">
             <!-- Header -->
             <div class="card-header">
                 <h2>{{ __('Masuk') }}</h2>
@@ -380,29 +380,27 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
+            <!-- Error Message -->
+            <template x-if="error">
+                <div class="alert-box alert-error">
+                    <span>✕</span>
+                    <span x-text="error"></span>
+                </div>
+            </template>
 
+            <form @submit.prevent="submitLogin">
                 <!-- Email Address -->
                 <div class="form-group">
                     <label for="email" class="form-label">{{ __('Email') }}</label>
                     <input 
                         id="email" 
                         type="email" 
-                        name="email" 
+                        x-model="email"
                         class="form-input"
-                        value="{{ old('email') }}"
                         placeholder="nama@email.com"
                         required 
                         autofocus 
-                        autocomplete="username" 
                     />
-                    @error('email')
-                        <div class="form-error">
-                            <span>✕</span>
-                            <span>{{ $message }}</span>
-                        </div>
-                    @enderror
                 </div>
 
                 <!-- Password -->
@@ -411,18 +409,11 @@
                     <input 
                         id="password" 
                         type="password" 
-                        name="password" 
+                        x-model="password"
                         class="form-input"
                         placeholder="••••••••"
                         required 
-                        autocomplete="current-password" 
                     />
-                    @error('password')
-                        <div class="form-error">
-                            <span>✕</span>
-                            <span>{{ $message }}</span>
-                        </div>
-                    @enderror
                 </div>
 
                 <!-- Remember Me -->
@@ -431,7 +422,7 @@
                         id="remember_me" 
                         type="checkbox" 
                         class="checkbox-input"
-                        name="remember"
+                        x-model="remember"
                     />
                     <label for="remember_me" class="checkbox-label">
                         {{ __('Ingat saya') }}
@@ -448,8 +439,9 @@
                 @endif
 
                 <!-- Login Button -->
-                <button type="submit" class="login-btn">
-                    {{ __('Masuk') }}
+                <button type="submit" class="login-btn" :disabled="loading">
+                    <span x-show="!loading">{{ __('Masuk') }}</span>
+                    <span x-show="loading">Memproses...</span>
                 </button>
             </form>
 
@@ -466,5 +458,61 @@
             </div>
         </div>
     </div>
+
+    <script>
+    function loginForm() {
+        return {
+            email: '',
+            password: '',
+            remember: false,
+            loading: false,
+            error: null,
+
+            async submitLogin() {
+                this.loading = true;
+                this.error = null;
+
+                try {
+                    const mutation = `
+                        mutation Login($email: String!, $password: String!) {
+                            login(email: $email, password: $password) {
+                                user { id name email role }
+                                message
+                            }
+                        }
+                    `;
+
+                    console.log('Sending login request...');
+                    const result = await GraphQL.mutate(mutation, {
+                        email: this.email,
+                        password: this.password
+                    });
+                    console.log('Login result:', result);
+
+                    if (result && result.login && result.login.user) {
+                        // Redirect based on role
+                        const role = result.login.user.role;
+                        console.log('Login successful, role:', role);
+                        if (role === 'admin') {
+                            window.location.href = '/dashboard';
+                        } else if (role === 'teacher') {
+                            window.location.href = '/teacher/courses';
+                        } else {
+                            window.location.href = '/student/my-courses';
+                        }
+                    } else {
+                        console.log('No user in result');
+                        this.error = 'Login gagal. Response tidak valid.';
+                    }
+                } catch (e) {
+                    console.error('Login error:', e);
+                    this.error = e.message || 'Login gagal. Periksa email dan password Anda.';
+                } finally {
+                    this.loading = false;
+                }
+            }
+        }
+    }
+    </script>
 
 </x-guest-layout>

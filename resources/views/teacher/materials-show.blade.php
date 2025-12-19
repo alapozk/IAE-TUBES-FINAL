@@ -28,6 +28,12 @@
         {{ strtoupper($material->extension) }} • {{ number_format($material->size/1024,0) }} KB
       </div>
 
+      @if($material->description)
+        <div style="margin:16px 0;padding:16px;background:#f9fafb;border-radius:12px;">
+          <div style="color:#4b5563;line-height:1.6">{!! nl2br(e($material->description)) !!}</div>
+        </div>
+      @endif
+
       @php $url = asset('storage/'.$material->file_path); @endphp
 
       @if (str_starts_with($material->mime,'video'))

@@ -1,9 +1,8 @@
+@import './custom.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-
-@import './custom.css';
 
 @layer utilities {
     .animate-blob {

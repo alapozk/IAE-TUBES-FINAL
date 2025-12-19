@@ -56,6 +56,9 @@ Route::middleware('auth')
 */
 Route::middleware(['auth', RoleMiddleware::class . ':admin'])
     ->group(function () {
+        Route::get('/admin', function() {
+            return view('admin.dashboard');
+        })->name('admin.dashboard');
         Route::get('/admin/users', AdminUser::class)
             ->name('admin.users');
     });
@@ -159,10 +162,14 @@ Route::middleware(['auth', RoleMiddleware::class . ':student'])
         // ===== Materials =====
         Route::get('/courses/{course}/materials/{material}', [StudentMaterialController::class, 'show'])
             ->name('student.materials.show');
+        // Alias for /course singular
+        Route::get('/course/{course}/materials/{material}', [StudentMaterialController::class, 'show']);
 
         // ===== Assignments Detail & Submit =====
         Route::get('/courses/{course}/assignments/{assignment}', [StudentAssignmentController::class, 'show'])
             ->name('student.assignments.show');
+        // Alias for /course singular
+        Route::get('/course/{course}/assignments/{assignment}', [StudentAssignmentController::class, 'show']);
 
         Route::get('/courses/{course}/assignments/{assignment}/submit', [StudentSubmissionController::class, 'create'])
             ->name('student.submissions.create');
@@ -173,6 +180,12 @@ Route::middleware(['auth', RoleMiddleware::class . ':student'])
         // ===== Quiz =====
         Route::get('/quiz/{quiz}/start', [StudentQuizAttemptController::class, 'start'])
             ->name('student.quiz.start');
+
+        Route::get('/quiz/{quiz}/attempt/{attempt}', [StudentQuizAttemptController::class, 'attempt'])
+            ->name('student.quiz.attempt');
+
+        Route::get('/quiz/{quiz}/result/{attempt}', [StudentQuizAttemptController::class, 'result'])
+            ->name('student.quiz.result');
 
         Route::post('/quiz/{quiz}/answer', [StudentQuizAttemptController::class, 'answer'])
             ->name('student.quiz.answer');

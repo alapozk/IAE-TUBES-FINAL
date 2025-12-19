@@ -1,254 +1,289 @@
-type Quiz {
+# ============================================================
+# IAE-TUBES GraphQL Schema - Full Implementation
+# ============================================================
+
+scalar DateTime
+scalar Upload
+
+# ============================================================
+# USER & AUTHENTICATION
+# ============================================================
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  role: String!
+  created_at: DateTime
+}
+
+type AuthPayload {
+  user: User
+  message: String
+}
+
+# ============================================================
+# COURSE
+# ============================================================
+
+type Course {
   id: ID!
   title: String!
+  code: String
+  status: String
+  teacher_id: ID
+  teacher: User
+  materials: [Material!]
+  assignments: [Assignment!]
+  quizzes: [Quiz!]
+  enrollments: [Enrollment!]
+  student_count: Int
+  created_at: DateTime
+}
+
+# ============================================================
+# ADMIN STATS
+# ============================================================
+
+type AdminStats {
+  totalCourses: Int!
+  totalTeachers: Int!
+  totalStudents: Int!
+  totalEnrollments: Int!
+  activeCourses: Int!
+}
+
+# ============================================================
+# ENROLLMENT
+# ============================================================
+
+type Enrollment {
+  id: ID!
+  student_id: ID!
   course_id: ID!
+  status: String!
+  course: Course
+  student: User
+  created_at: DateTime
+}
+
+# ============================================================
+# MATERIAL
+# ============================================================
+
+type Material {
+  id: ID!
+  course_id: ID!
+  course: Course @belongsTo
+  title: String!
+  description: String
+  file_path: String
+  file_url: String
+  mime: String
+  size: Int
+  extension: String
+  created_at: DateTime
+}
+
+# ============================================================
+# ASSIGNMENT & SUBMISSION
+# ============================================================
+
+type Assignment {
+  id: ID!
+  course_id: ID!
+  course: Course @belongsTo
+  title: String!
+  instructions: String
+  due_at: DateTime
+  submission_mode: String
+  max_points: Int
+  submissions: [Submission!]
+  created_at: DateTime
+}
+
+type Submission {
+  id: ID!
+  course_id: ID!
+  assignment_id: ID!
+  student_id: ID!
+  title: String
+  file_path: String
+  file_url: String
+  size: Int
+  extension: String
+  grade: Int
+  feedback: String
+  student: User
+  created_at: DateTime
+}
+
+# ============================================================
+# QUIZ
+# ============================================================
+
+type Quiz {
+  id: ID!
+  course_id: ID!
+  title: String!
   max_attempt: Int!
   duration: Int
+  deadline: DateTime
   show_review: Boolean!
   is_published: Boolean!
-}
-
-type Query {
-  teacherQuiz(quiz_id: ID!): Quiz
-    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@show")
-}
-
-type Mutation {
-  createQuiz(
-    course_id: ID!
-    title: String!
-    max_attempt: Int!
-    duration: Int
-    show_review: Boolean!
-  ): Quiz
-    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@store")
+  questions: [QuizQuestion!]
+  attempts: [QuizAttempt!]
+  created_at: DateTime
 }
 
 type QuizQuestion {
   id: ID!
   quiz_id: ID!
   question: String!
-}
-
-extend type Query {
-  quizQuestions(quiz_id: ID!): [QuizQuestion!]!
-    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizQuestionResolver@list")
-}
-
-extend type Mutation {
-  createQuizQuestion(
-    quiz_id: ID!
-    question: String!
-  ): QuizQuestion
-    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizQuestionResolver@store")
-}
-
-type QuizOption {
-  id: ID!
-  quiz_question_id: ID!
-  option_text: String!
-  is_correct: Boolean!
-}
-
-extend type Mutation {
-  createQuizOption(
-    quiz_question_id: ID!
-    option_text: String!
-    is_correct: Boolean!
-  ): QuizOption
-    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizOptionResolver@store")
+  option_a: String!
+  option_b: String!
+  option_c: String!
+  option_d: String!
+  correct_answer: String!
 }
 
 type QuizAttempt {
   id: ID!
   quiz_id: ID!
   user_id: ID!
-  is_finished: Boolean!
-}
-
-extend type Mutation {
-  startQuiz(quiz_id: ID!): QuizAttempt
-    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizAttemptResolver@start")
+  score: Int
+  quiz: Quiz
+  user: User
+  answers: [QuizAnswer!]
+  created_at: DateTime
 }
 
 type QuizAnswer {
   id: ID!
   quiz_attempt_id: ID!
   quiz_question_id: ID!
-  quiz_option_id: ID!
+  selected_answer: String
+  question: QuizQuestion
 }
 
-extend type Mutation {
-  answerQuiz(
-    quiz_attempt_id: ID!
-    quiz_question_id: ID!
-    quiz_option_id: ID!
-  ): QuizAnswer
-    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizAnswerResolver@answer")
-}
-
-type QuizAttempt {
-  id: ID!
-  quiz_id: ID!
-  user_id: ID!
-  is_finished: Boolean!
-  score: Float
-  finished_at: DateTime
-}
-
-extend type Mutation {
-  finishQuizAttempt(quiz_attempt_id: ID!): QuizAttempt
-    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizScoringResolver@finish")
-}
-
-type Course {
-  id: ID!
-  title: String!
-  description: String
-  is_published: Boolean!
-}
-
-type Enrollment {
-  id: ID!
-  user_id: ID!
-  course_id: ID!
-  status: String!
-  course: Course
-}
-
-extend type Query {
-  courses: [Course!]!
-    @field(resolver: "App\\GraphQL\\Resolvers\\Public\\CourseResolver@list")
-
-  course(course_id: ID!): Course
-    @field(resolver: "App\\GraphQL\\Resolvers\\Public\\CourseResolver@show")
-
-  myEnrollments(user_id: ID!): [Enrollment!]!
-    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\EnrollmentResolver@myCourses")
-}
-
-extend type Mutation {
-  enrollCourse(
-    user_id: ID!
-    course_id: ID!
-  ): Enrollment
-    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\EnrollmentResolver@enroll")
-}
-
-type Assignment {
-  id: ID!
-  course_id: ID!
-  title: String!
-  description: String
-  deadline: DateTime!
-}
-
-type Submission {
-  id: ID!
-  assignment_id: ID!
-  user_id: ID!
-  content: String!
-  created_at: DateTime
-}
-
-extend type Query {
-
-  # Teacher
-  teacherAssignments(course_id: ID!): [Assignment!]!
-    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AssignmentResolver@listByCourse")
-
-  # Student
-  studentAssignments(course_id: ID!): [Assignment!]!
-    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\AssignmentResolver@listByCourse")
-}
-
-extend type Mutation {
-
-  # Teacher
-  createAssignment(
-    course_id: ID!
-    title: String!
-    description: String
-    deadline: DateTime!
-  ): Assignment
-    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AssignmentResolver@store")
-
-  # Student
-  submitAssignment(
-    assignment_id: ID!
-    user_id: ID!
-    content: String!
-  ): Submission
-    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\SubmissionResolver@submit")
-}
-
-type Material {
-  id: ID!
-  course_id: ID!
-  title: String!
-  content: String!
-  created_at: DateTime
-}
-
-extend type Query {
-
-  # Teacher
-  teacherMaterials(course_id: ID!): [Material!]!
-    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\MaterialResolver@listByCourse")
-
-  # Student
-  studentMaterials(course_id: ID!): [Material!]!
-    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\MaterialResolver@listByCourse")
-}
-
-extend type Mutation {
-
-  # Teacher
-  createMaterial(
-    course_id: ID!
-    title: String!
-    content: String!
-  ): Material
-    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\MaterialResolver@store")
-}
+# ============================================================
+# ATTENDANCE (Optional)
+# ============================================================
 
 type AttendanceSession {
   id: ID!
   course_id: ID!
   title: String!
-  opened_at: DateTime!
-  closed_at: DateTime!
+  opened_at: DateTime
+  closed_at: DateTime
 }
 
 type AttendanceRecord {
   id: ID!
   attendance_session_id: ID!
   user_id: ID!
-  checked_in_at: DateTime!
+  checked_in_at: DateTime
 }
 
-extend type Query {
+# ============================================================
+# QUERIES
+# ============================================================
+
+type Query {
+  # Auth
+  me: User @field(resolver: "App\\GraphQL\\Resolvers\\AuthResolver@me")
+
+  # Public
+  courses: [Course!]! @field(resolver: "App\\GraphQL\\Resolvers\\CourseResolver@list")
+  course(id: ID!): Course @field(resolver: "App\\GraphQL\\Resolvers\\CourseResolver@show")
+  publicCourses: [Course!]! @field(resolver: "App\\GraphQL\\Resolvers\\Public\\CourseResolver@list")
+  publicCourse(id: ID!): Course @field(resolver: "App\\GraphQL\\Resolvers\\Public\\CourseResolver@show")
+
+  # Admin
+  adminCourses: [Course!]! @field(resolver: "App\\GraphQL\\Resolvers\\Admin\\CourseResolver@list")
+  adminUsers(role: String): [User!]! @field(resolver: "App\\GraphQL\\Resolvers\\Admin\\UserResolver@list")
+  adminStats: AdminStats @field(resolver: "App\\GraphQL\\Resolvers\\Admin\\StatsResolver@get")
 
   # Teacher
-  attendanceSessions(course_id: ID!): [AttendanceSession!]!
-    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AttendanceSessionResolver@listByCourse")
-}
-
-extend type Mutation {
-
-  # Teacher
-  createAttendanceSession(
-    course_id: ID!
-    title: String!
-    opened_at: DateTime!
-    closed_at: DateTime!
-  ): AttendanceSession
-    @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AttendanceSessionResolver@store")
+  teacherCourses: [Course!]! @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\CourseResolver@myList")
+  teacherCourse(id: ID!): Course @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\CourseResolver@show")
+  teacherMaterials(course_id: ID!): [Material!]! @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\MaterialResolver@listByCourse")
+  teacherMaterial(id: ID!): Material @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\MaterialResolver@show")
+  teacherAssignments(course_id: ID!): [Assignment!]! @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AssignmentResolver@listByCourse")
+  teacherAssignment(id: ID!): Assignment @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AssignmentResolver@show")
+  teacherQuizzes(course_id: ID!): [Quiz!]! @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@listByCourse")
+  teacherQuiz(id: ID!): Quiz @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@show")
 
   # Student
-  checkInAttendance(
-    attendance_session_id: ID!
-    user_id: ID!
-  ): AttendanceRecord
-    @field(resolver: "App\\GraphQL\\Resolvers\\Student\\AttendanceRecordResolver@checkIn")
+  myEnrollments: [Enrollment!]! @field(resolver: "App\\GraphQL\\Resolvers\\Student\\EnrollmentResolver@myCourses")
+  studentCourse(id: ID!): Course @field(resolver: "App\\GraphQL\\Resolvers\\Student\\CourseResolver@show")
+  studentMaterials(course_id: ID!): [Material!]! @field(resolver: "App\\GraphQL\\Resolvers\\Student\\MaterialResolver@listByCourse")
+  studentMaterial(id: ID!): Material @field(resolver: "App\\GraphQL\\Resolvers\\Student\\MaterialResolver@show")
+  studentAssignments: [Assignment!]! @field(resolver: "App\\GraphQL\\Resolvers\\Student\\AssignmentResolver@myAssignments")
+  studentAssignment(id: ID!): Assignment @field(resolver: "App\\GraphQL\\Resolvers\\Student\\AssignmentResolver@show")
+  studentQuizAttempt(id: ID!): QuizAttempt @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizAttemptResolver@show")
+}
+
+# ============================================================
+# MUTATIONS
+# ============================================================
+
+type Mutation {
+  # Auth
+  login(email: String!, password: String!): AuthPayload @field(resolver: "App\\GraphQL\\Resolvers\\AuthResolver@login")
+  register(name: String!, email: String!, password: String!, password_confirmation: String!): AuthPayload @field(resolver: "App\\GraphQL\\Resolvers\\AuthResolver@register")
+  logout: AuthPayload @field(resolver: "App\\GraphQL\\Resolvers\\AuthResolver@logout")
+
+  # Admin - User Management
+  adminCreateUser(name: String!, email: String!, password: String!, role: String!): User @field(resolver: "App\\GraphQL\\Resolvers\\Admin\\UserResolver@create")
+  adminUpdateUser(id: ID!, name: String!, email: String!, role: String!, password: String): User @field(resolver: "App\\GraphQL\\Resolvers\\Admin\\UserResolver@update")
+  adminDeleteUser(id: ID!): Boolean @field(resolver: "App\\GraphQL\\Resolvers\\Admin\\UserResolver@delete")
+
+  # Teacher - Course
+  createCourse(title: String!, code: String!, status: String): Course @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\CourseResolver@store")
+  updateCourse(id: ID!, title: String!, code: String, status: String): Course @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\CourseResolver@update")
+  deleteCourse(id: ID!): Boolean @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\CourseResolver@delete")
+
+  # Teacher - Material
+  createMaterial(course_id: ID!, title: String!, description: String, file: Upload!): Material @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\MaterialResolver@store")
+  updateMaterial(id: ID!, title: String!, description: String, file: Upload): Material @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\MaterialResolver@update")
+  deleteMaterial(id: ID!): Boolean @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\MaterialResolver@delete")
+
+  # Teacher - Assignment
+  createAssignment(course_id: ID!, title: String!, instructions: String, due_at: DateTime, submission_mode: String!, max_points: Int): Assignment @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AssignmentResolver@store")
+  updateAssignment(id: ID!, title: String!, instructions: String, due_at: DateTime, submission_mode: String!, max_points: Int): Assignment @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AssignmentResolver@update")
+  deleteAssignment(id: ID!): Boolean @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\AssignmentResolver@delete")
+
+  # Teacher - Quiz
+  createQuiz(course_id: ID!, title: String!, max_attempt: Int!, duration: Int, deadline: DateTime, show_review: Boolean!, is_published: Boolean!): Quiz @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@store")
+  updateQuiz(id: ID!, title: String!, max_attempt: Int!, duration: Int, deadline: DateTime, show_review: Boolean!, is_published: Boolean!): Quiz @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@update")
+  deleteQuiz(id: ID!): Boolean @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@delete")
+  toggleQuizPublish(id: ID!): Quiz @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizResolver@togglePublish")
+
+  # Teacher - Quiz Questions
+  createQuizQuestions(quiz_id: ID!, questions: [QuizQuestionInput!]!): [QuizQuestion!]! @field(resolver: "App\\GraphQL\\Resolvers\\Teacher\\QuizQuestionResolver@storeMany")
+
+  # Student - Enrollment
+  enrollCourse(course_id: ID!): Enrollment @field(resolver: "App\\GraphQL\\Resolvers\\Student\\EnrollmentResolver@enroll")
+
+  # Student - Submission
+  submitAssignment(course_id: ID!, assignment_id: ID!, file: Upload!): Submission @field(resolver: "App\\GraphQL\\Resolvers\\Student\\SubmissionResolver@submit")
+
+  # Student - Quiz
+  startQuiz(quiz_id: ID!): QuizAttempt @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizAttemptResolver@start")
+  answerQuiz(attempt_id: ID!, question_id: ID!, selected_answer: String!): QuizAnswer @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizAttemptResolver@answer")
+  finishQuiz(attempt_id: ID!): QuizAttempt @field(resolver: "App\\GraphQL\\Resolvers\\Student\\QuizAttemptResolver@finish")
+}
+
+# ============================================================
+# INPUT TYPES
+# ============================================================
+
+input QuizQuestionInput {
+  question: String!
+  option_a: String!
+  option_b: String!
+  option_c: String!
+  option_d: String!
+  correct_answer: String!
 }

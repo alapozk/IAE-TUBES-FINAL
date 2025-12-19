@@ -3,350 +3,379 @@
 
 @section('content')
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  .dashboard-wrapper {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 40px 20px;
-  }
-
-  .dashboard-container {
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  /* Header */
-  .dashboard-header {
-    margin-bottom: 50px;
-    animation: slideDown 0.6s ease-out;
-  }
-
-  .dashboard-header h1 {
-    font-size: 3rem;
-    font-weight: 900;
-    color: white;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-  }
-
-  .dashboard-header p {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  /* Stats Grid */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 50px;
-  }
-
-  .stat-card {
-    background: white;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    animation: slideUp 0.6s ease-out;
-    transition: all 0.3s ease;
-  }
-
-  .stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
-  }
-
-  .stat-icon {
-    font-size: 2.5rem;
-    margin-bottom: 12px;
-  }
-
-  .stat-value {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #667eea;
-    margin-bottom: 5px;
-  }
-
-  .stat-label {
-    font-size: 0.95rem;
-    color: #718096;
-    font-weight: 600;
-  }
-
-  /* Menu Grid */
-  .menu-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
-    margin-bottom: 40px;
-  }
-
-  .menu-card {
-    background: white;
-    border-radius: 15px;
-    padding: 40px 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    animation: fadeInUp 0.7s ease-out;
-    text-decoration: none;
-    color: inherit;
-    display: flex;
-    flex-direction: column;
-    cursor: pointer;
-  }
-
-  .menu-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 5px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-  }
-
-  .menu-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), transparent);
-    border-radius: 50%;
-    transform: translate(30px, -30px);
-  }
-
-  .menu-card:hover {
-    transform: translateY(-12px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
-  }
-
-  .menu-icon {
-    font-size: 3rem;
-    margin-bottom: 20px;
-    z-index: 1;
-  }
-
-  .menu-title {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #1a202c;
-    margin-bottom: 12px;
-    z-index: 1;
-  }
-
-  .menu-description {
-    font-size: 0.95rem;
-    color: #718096;
-    line-height: 1.6;
-    flex-grow: 1;
-    margin-bottom: 20px;
-    z-index: 1;
-  }
-
-  .menu-link {
-    display: inline-flex;
-    align-items: center;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    width: fit-content;
-    z-index: 1;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  }
-
-  .menu-link:hover {
-    transform: translateX(5px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-  }
-
-  .menu-link svg {
-    width: 18px;
-    height: 18px;
-    margin-left: 8px;
-  }
-
-  /* Quick Actions */
-  .quick-actions {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    animation: fadeInUp 0.8s ease-out;
-  }
-
-  .quick-actions h2 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #1a202c;
-    margin-bottom: 20px;
-  }
-
-  .action-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-  }
-
-  .action-item {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    background: #f7fafc;
-    border-radius: 10px;
-    border-left: 4px solid #667eea;
-    transition: all 0.3s ease;
-  }
-
-  .action-item:hover {
-    background: #edf2f7;
-    transform: translateX(5px);
-  }
-
-  .action-item a {
-    display: flex;
-    align-items: center;
-    color: inherit;
-    text-decoration: none;
-    font-weight: 600;
-    color: #4a5568;
-    width: 100%;
-  }
-
-  .action-item svg {
-    width: 20px;
-    height: 20px;
-    margin-right: 12px;
-    color: #667eea;
-  }
-
-  /* Animations */
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .dashboard-wrapper {
-      padding: 30px 15px;
-    }
-
-    .dashboard-header h1 {
-      font-size: 2rem;
-    }
-
-    .menu-grid {
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-
-    .stats-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .quick-actions {
-      padding: 20px;
-    }
-
-    .action-list {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .dashboard-header h1 {
-      font-size: 1.5rem;
-    }
-
-    .stat-value {
-      font-size: 1.5rem;
-    }
-
-    .menu-title {
-      font-size: 1.2rem;
-    }
-
-    .stats-grid {
-      grid-template-columns: 1fr;
-    }
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .dashboard-wrapper { min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; }
+  .dashboard-container { max-width: 1400px; margin: 0 auto; }
+  .dashboard-header { margin-bottom: 40px; animation: slideDown 0.6s ease-out; }
+  .dashboard-header h1 { font-size: 2.5rem; font-weight: 900; color: white; margin-bottom: 10px; }
+  .dashboard-header p { font-size: 1.1rem; color: rgba(255, 255, 255, 0.9); }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
+  .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); transition: all 0.3s ease; }
+  .stat-card:hover { transform: translateY(-5px); }
+  .stat-value { font-size: 2rem; font-weight: 800; color: #667eea; margin-bottom: 5px; }
+  .stat-label { font-size: 0.9rem; color: #718096; font-weight: 600; }
+  .content-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); margin-bottom: 25px; }
+  .tab-nav { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all .2s; background: rgba(255,255,255,0.2); color: white; }
+  .tab-btn.active { background: white; color: #667eea; }
+  .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.3); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+  th { font-weight: 600; color: #718096; font-size: .85rem; text-transform: uppercase; }
+  td { color: #1a202c; }
+  tr:hover { background: #f7fafc; }
+  .badge { padding: 4px 10px; border-radius: 20px; font-size: .75rem; font-weight: 600; }
+  .badge-active { background: #d1fae5; color: #059669; }
+  .badge-inactive { background: #fed7d7; color: #c53030; }
+  .badge-teacher { background: #dbeafe; color: #2563eb; }
+  .badge-student { background: #fef3c7; color: #d97706; }
+  .badge-admin { background: #ede9fe; color: #7c3aed; }
+  .search-row { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
+  .search-input { flex: 1; min-width: 200px; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem; }
+  .search-input:focus { outline: none; border-color: #667eea; }
+  .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .btn-primary { background: #667eea; color: white; }
+  .btn-primary:hover { background: #5a67d8; }
+  .btn-success { background: #10b981; color: white; }
+  .btn-success:hover { background: #059669; }
+  .btn-danger { background: #ef4444; color: white; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-sm { padding: 6px 12px; font-size: .85rem; }
+  .action-btns { display: flex; gap: 8px; }
+  .loading { text-align: center; padding: 40px; color: #718096; }
+  .error { background: #fee2e2; color: #991b1b; padding: 16px; border-radius: 12px; margin-bottom: 20px; }
+  .success { background: #d1fae5; color: #065f46; padding: 16px; border-radius: 12px; margin-bottom: 20px; }
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+  .modal { background: white; border-radius: 16px; padding: 30px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: #1a202c; }
+  .form-group { margin-bottom: 15px; }
+  .form-group label { display: block; font-weight: 600; margin-bottom: 5px; color: #4a5568; }
+  .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 
-<div class="dashboard-wrapper">
+<div class="dashboard-wrapper" x-data="adminDashboard()" x-init="loadData()">
   <div class="dashboard-container">
-    
     <!-- Header -->
     <div class="dashboard-header">
-      <h1>📊 Admin Dashboard</h1>
-      <p>Selamat datang, kelola semua aspek platform EduConnect dari sini</p>
+      <h1>🛠️ Admin Dashboard</h1>
+      <p>Kelola kursus dan pengguna platform EduConnect</p>
     </div>
 
-    <!-- Main Menu -->
-    <div class="menu-grid">
-      <a href="{{ route('admin.users') }}" class="menu-card">
-        <div class="menu-icon">👥</div>
-        <h3 class="menu-title">Kelola Pengguna</h3>
-        <p class="menu-description">Kelola data guru dan siswa, verifikasi akun, atur permission, dan monitor aktivitas pengguna di platform.</p>
-        <div class="menu-link">
-          Akses Sekarang
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-          </svg>
-        </div>
-      </a>
+    <!-- Error/Success -->
+    <div class="error" x-show="error" x-text="error"></div>
+    <div class="success" x-show="success" x-text="success"></div>
 
-      <a href="{{ route('courses.catalog') }}" class="menu-card">
-        <div class="menu-icon">📚</div>
-        <h3 class="menu-title">Katalog Kursus</h3>
-        <p class="menu-description">Kelola semua kursus yang tersedia, review konten, terima submission kursus baru, dan atur kategori kursus.</p>
-        <div class="menu-link">
-          Akses Sekarang
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-          </svg>
-        </div>
-      </a>
+    <!-- Stats -->
+    <div class="stats-grid" x-show="stats">
+      <div class="stat-card">
+        <div class="stat-value" x-text="stats?.totalCourses || 0"></div>
+        <div class="stat-label">📚 Total Kursus</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" x-text="stats?.activeCourses || 0"></div>
+        <div class="stat-label">✅ Kursus Aktif</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" x-text="stats?.totalTeachers || 0"></div>
+        <div class="stat-label">👨‍🏫 Total Guru</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" x-text="stats?.totalStudents || 0"></div>
+        <div class="stat-label">👨‍🎓 Total Siswa</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" x-text="stats?.totalEnrollments || 0"></div>
+        <div class="stat-label">📝 Pendaftaran</div>
+      </div>
+    </div>
 
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button class="tab-btn" :class="{ 'active': activeTab === 'courses' }" @click="activeTab = 'courses'">📚 Kursus</button>
+      <button class="tab-btn" :class="{ 'active': activeTab === 'teachers' }" @click="activeTab = 'teachers'; loadUsers('teacher')">👨‍🏫 Guru</button>
+      <button class="tab-btn" :class="{ 'active': activeTab === 'students' }" @click="activeTab = 'students'; loadUsers('student')">👨‍🎓 Siswa</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="content-card" x-show="loading">
+      <div class="loading">Memuat data...</div>
+    </div>
+
+    <!-- Courses Tab -->
+    <div class="content-card" x-show="activeTab === 'courses' && !loading">
+      <input type="text" class="search-input" placeholder="🔍 Cari kursus..." x-model="searchCourse" @input="filterCourses()">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Judul Kursus</th>
+            <th>Kode</th>
+            <th>Guru</th>
+            <th>Siswa</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="course in filteredCourses" :key="course.id">
+            <tr>
+              <td x-text="course.id"></td>
+              <td x-text="course.title"></td>
+              <td x-text="course.code || '-'"></td>
+              <td x-text="course.teacher?.name || '-'"></td>
+              <td x-text="course.student_count || 0"></td>
+              <td><span class="badge" :class="course.status === 'active' ? 'badge-active' : 'badge-inactive'" x-text="course.status || 'draft'"></span></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+      <p x-show="filteredCourses.length === 0" class="loading">Tidak ada kursus ditemukan</p>
+    </div>
+
+    <!-- Teachers/Students Tab -->
+    <div class="content-card" x-show="(activeTab === 'teachers' || activeTab === 'students') && !loading">
+      <div class="search-row">
+        <input type="text" class="search-input" placeholder="🔍 Cari pengguna..." x-model="searchUser" @input="filterUsers()">
+        <button class="btn btn-primary" @click="openCreateModal()">➕ Tambah User</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nama</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Terdaftar</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="user in filteredUsers" :key="user.id">
+            <tr>
+              <td x-text="user.id"></td>
+              <td x-text="user.name"></td>
+              <td x-text="user.email"></td>
+              <td><span class="badge" :class="getRoleBadge(user.role)" x-text="user.role"></span></td>
+              <td x-text="formatDate(user.created_at)"></td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn btn-sm btn-success" @click="openEditModal(user)">✏️ Edit</button>
+                  <button class="btn btn-sm btn-danger" @click="confirmDelete(user)">🗑️ Hapus</button>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+      <p x-show="filteredUsers.length === 0" class="loading">Tidak ada pengguna ditemukan</p>
+    </div>
+
+    <!-- Create/Edit User Modal -->
+    <div class="modal-overlay" x-show="showModal" @click.self="showModal = false" x-cloak>
+      <div class="modal">
+        <h2 x-text="editingUser ? '✏️ Edit User' : '➕ Tambah User Baru'"></h2>
+        
+        <div class="form-group">
+          <label>Nama</label>
+          <input type="text" x-model="form.name" placeholder="Nama lengkap">
+        </div>
+        
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" x-model="form.email" placeholder="email@example.com">
+        </div>
+        
+        <div class="form-group">
+          <label>Role</label>
+          <select x-model="form.role">
+            <option value="">Pilih Role</option>
+            <option value="teacher">Guru</option>
+            <option value="student">Siswa</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label x-text="editingUser ? 'Password (kosongkan jika tidak diubah)' : 'Password'"></label>
+          <input type="password" x-model="form.password" placeholder="********">
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn" @click="showModal = false">Batal</button>
+          <button class="btn btn-primary" @click="saveUser()" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Simpan'"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" x-show="showDeleteModal" @click.self="showDeleteModal = false" x-cloak>
+      <div class="modal">
+        <h2>⚠️ Konfirmasi Hapus</h2>
+        <p style="margin-bottom: 20px; color: #4a5568;">
+          Yakin ingin menghapus user <strong x-text="deleteTarget?.name"></strong>? Tindakan ini tidak dapat dibatalkan.
+        </p>
+        <div class="modal-actions">
+          <button class="btn" @click="showDeleteModal = false">Batal</button>
+          <button class="btn btn-danger" @click="deleteUser()" :disabled="saving" x-text="saving ? 'Menghapus...' : 'Hapus'"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function adminDashboard() {
+  return {
+    activeTab: 'courses',
+    loading: true,
+    error: null,
+    success: null,
+    stats: null,
+    courses: [],
+    users: [],
+    filteredCourses: [],
+    filteredUsers: [],
+    searchCourse: '',
+    searchUser: '',
+    showModal: false,
+    showDeleteModal: false,
+    editingUser: null,
+    deleteTarget: null,
+    saving: false,
+    form: { name: '', email: '', role: '', password: '' },
+
+    async loadData() {
+      try {
+        const query = `query {
+          adminStats { totalCourses totalTeachers totalStudents totalEnrollments activeCourses }
+          adminCourses { id title code status student_count teacher { id name email } }
+        }`;
+        const result = await GraphQL.query(query);
+        this.stats = result.adminStats;
+        this.courses = result.adminCourses || [];
+        this.filteredCourses = this.courses;
+      } catch (e) {
+        this.error = e.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async loadUsers(role) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const query = `query AdminUsers($role: String) { adminUsers(role: $role) { id name email role created_at } }`;
+        const result = await GraphQL.query(query, { role });
+        this.users = result.adminUsers || [];
+        this.filteredUsers = this.users;
+      } catch (e) {
+        this.error = e.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    openCreateModal() {
+      this.editingUser = null;
+      this.form = { name: '', email: '', role: this.activeTab === 'teachers' ? 'teacher' : 'student', password: '' };
+      this.showModal = true;
+    },
+
+    openEditModal(user) {
+      this.editingUser = user;
+      this.form = { name: user.name, email: user.email, role: user.role, password: '' };
+      this.showModal = true;
+    },
+
+    confirmDelete(user) {
+      this.deleteTarget = user;
+      this.showDeleteModal = true;
+    },
+
+    async saveUser() {
+      if (!this.form.name || !this.form.email || !this.form.role) {
+        this.error = 'Semua field wajib diisi.';
+        return;
+      }
+      if (!this.editingUser && !this.form.password) {
+        this.error = 'Password wajib diisi untuk user baru.';
+        return;
+      }
+
+      this.saving = true;
+      this.error = null;
+
+      try {
+        if (this.editingUser) {
+          const mutation = `mutation AdminUpdateUser($id: ID!, $name: String!, $email: String!, $role: String!, $password: String) {
+            adminUpdateUser(id: $id, name: $name, email: $email, role: $role, password: $password) { id name email role }
+          }`;
+          await GraphQL.mutate(mutation, { id: this.editingUser.id, ...this.form });
+          this.success = 'User berhasil diupdate!';
+        } else {
+          const mutation = `mutation AdminCreateUser($name: String!, $email: String!, $password: String!, $role: String!) {
+            adminCreateUser(name: $name, email: $email, password: $password, role: $role) { id name email role }
+          }`;
+          await GraphQL.mutate(mutation, this.form);
+          this.success = 'User berhasil ditambahkan!';
+        }
+        this.showModal = false;
+        await this.loadUsers(this.activeTab === 'teachers' ? 'teacher' : 'student');
+        await this.loadData(); // Refresh stats
+        setTimeout(() => this.success = null, 3000);
+      } catch (e) {
+        this.error = e.message;
+      } finally {
+        this.saving = false;
+      }
+    },
+
+    async deleteUser() {
+      this.saving = true;
+      this.error = null;
+
+      try {
+        const mutation = `mutation AdminDeleteUser($id: ID!) { adminDeleteUser(id: $id) }`;
+        await GraphQL.mutate(mutation, { id: this.deleteTarget.id });
+        this.success = 'User berhasil dihapus!';
+        this.showDeleteModal = false;
+        await this.loadUsers(this.activeTab === 'teachers' ? 'teacher' : 'student');
+        await this.loadData();
+        setTimeout(() => this.success = null, 3000);
+      } catch (e) {
+        this.error = e.message;
+      } finally {
+        this.saving = false;
+      }
+    },
+
+    getRoleBadge(role) {
+      if (role === 'teacher') return 'badge-teacher';
+      if (role === 'student') return 'badge-student';
+      if (role === 'admin') return 'badge-admin';
+      return '';
+    },
+
+    filterCourses() {
+      const search = this.searchCourse.toLowerCase();
+      this.filteredCourses = this.courses.filter(c => c.title.toLowerCase().includes(search) || (c.code && c.code.toLowerCase().includes(search)) || (c.teacher?.name && c.teacher.name.toLowerCase().includes(search)));
+    },
+
+    filterUsers() {
+      const search = this.searchUser.toLowerCase();
+      this.filteredUsers = this.users.filter(u => u.name.toLowerCase().includes(search) || u.email.toLowerCase().includes(search));
+    },
+
+    formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+  }
+}
+</script>
 @endsection

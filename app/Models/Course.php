@@ -30,14 +30,15 @@ class Course extends Model
 
     /**
      * 🔑 RELASI PENTING UNTUK VALIDASI ENROLMENT
+     * FK di tabel enrollments adalah 'student_id', bukan 'user_id'
      */
     public function students()
     {
         return $this->belongsToMany(
             User::class,
             'enrollments',   // pivot table
-            'course_id',
-            'user_id'
+            'course_id',     // FK ke courses
+            'student_id'     // FK ke users (FIXED: was 'user_id')
         );
     }
 

@@ -58,7 +58,7 @@ class AssignmentController extends Controller
     private function ensureEnrolled(Course $course)
     {
         $isEnrolled = $course->students()
-            ->where('user_id', auth()->id())
+            ->where('users.id', auth()->id())
             ->exists();
 
         abort_if(!$isEnrolled, 403, 'Anda belum terdaftar pada kursus ini.');

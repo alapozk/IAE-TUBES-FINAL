@@ -12,7 +12,7 @@ return [
         'uri' => '/graphql',
         'name' => 'graphql',
         'middleware' => [
-            'api',
+            'web', // Changed from 'api' to support session-based auth
             Nuwave\Lighthouse\Http\Middleware\AcceptJson::class,
             Nuwave\Lighthouse\Http\Middleware\AttemptAuthentication::class,
         ],

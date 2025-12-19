@@ -80,8 +80,4 @@ class AssignmentController extends Controller
 
         return back()->with('ok', 'Tugas dihapus.');
     }
-    public function submissions()
-    {
-    return $this->hasMany(Submission::class);
-    }
 }
