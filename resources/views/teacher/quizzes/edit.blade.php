@@ -2,137 +2,508 @@
 
 @section('content')
 <style>
-  .page{background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);min-height:100vh;padding:32px 20px}
-  .container{max-width:900px;margin:0 auto}
-  .back{display:inline-flex;gap:8px;align-items:center;color:#667eea;text-decoration:none;font-weight:700;margin-bottom:14px}
-  .card{background:#fff;border-radius:18px;box-shadow:0 15px 40px rgba(0,0,0,.10);padding:26px;margin-bottom:20px}
-  .card h3{font-weight:900;margin-bottom:18px;display:flex;align-items:center;gap:10px}
-  .form-group{margin-bottom:16px}
-  label{font-weight:800;margin-bottom:6px;display:block}
-  .form-control{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #e5e7eb;font-weight:600}
-  .form-control:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.25)}
-  .actions{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
-  .btn{display:inline-flex;gap:8px;align-items:center;padding:12px 18px;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;color:#111827;text-decoration:none;font-weight:800;cursor:pointer}
-  .btn:hover{background:#f3f4f6}
-  .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;box-shadow:0 8px 20px rgba(102,126,234,.35)}
-  .btn-primary:hover{transform:translateY(-1px)}
-  .btn-primary:disabled{opacity:0.6;cursor:not-allowed;transform:none}
-  .btn-sm{padding:8px 14px;font-size:.85rem}
-  .btn-danger{background:#dc2626;color:#fff;border:none}
-  .hint{color:#6b7280;font-size:.85rem;margin-top:4px}
-  .alert{padding:12px;border-radius:10px;margin-bottom:16px}
-  .alert-error{background:#fee2e2;color:#991b1b}
-  .alert-success{background:#d1fae5;color:#065f46}
-  .loading{text-align:center;padding:30px}
-  .question-item{background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:12px}
-  .question-item:hover{background:#f1f5f9}
-  .question-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-  .question-number{background:#667eea;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0}
-  .question-text{flex:1;font-weight:600;color:#1f2937}
-  .question-actions{display:flex;gap:8px}
-  .options-preview{margin-top:10px;font-size:.85rem;color:#6b7280}
-  .correct-answer{color:#059669;font-weight:700}
+    /* ===== Page Layout ===== */
+    .quiz-edit-page {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 32px 20px;
+    }
+
+    .quiz-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    /* ===== Back Link ===== */
+    .back-link {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 700;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+        color: #5a67d8;
+        transform: translateX(-4px);
+    }
+
+    /* ===== Card ===== */
+    .settings-card,
+    .questions-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.10);
+        padding: 28px;
+        margin-bottom: 24px;
+        animation: slideUp 0.4s ease-out;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f3f4f6;
+    }
+
+    .card-title {
+        font-weight: 900;
+        font-size: 1.4rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #1f2937;
+    }
+
+    .question-count {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    /* ===== Form ===== */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 0;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        font-weight: 800;
+        margin-bottom: 8px;
+        display: block;
+        color: #374151;
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        background: #f9fafb;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+        background: #fff;
+    }
+
+    /* ===== Alerts ===== */
+    .alert {
+        padding: 14px 18px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+
+    /* ===== Buttons ===== */
+    .btn-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 2px solid #f3f4f6;
+    }
+
+    .btn {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        padding: 14px 24px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        background: #f9fafb;
+        color: #374151;
+        text-decoration: none;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+        background: #f3f4f6;
+        transform: translateY(-1px);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border: none;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.35);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.45);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-sm {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+    }
+
+    .btn-danger {
+        background: #dc2626;
+        color: #fff;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background: #b91c1c;
+    }
+
+    /* ===== Loading ===== */
+    .loading-state {
+        text-align: center;
+        padding: 50px 20px;
+        color: #6b7280;
+    }
+
+    .loading-spinner {
+        font-size: 2rem;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* ===== Question Item ===== */
+    .question-item {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+    }
+
+    .question-item:hover {
+        border-color: #c7d2fe;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    }
+
+    .question-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .question-number {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .question-content {
+        flex: 1;
+    }
+
+    .question-text {
+        font-weight: 700;
+        color: #1f2937;
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+
+    .question-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    /* ===== Options Preview ===== */
+    .options-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .option-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: #fff;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: #475569;
+    }
+
+    .option-letter {
+        font-weight: 800;
+        color: #667eea;
+    }
+
+    .correct-answer-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        padding: 8px 14px;
+        background: #d1fae5;
+        color: #065f46;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    /* ===== Empty State ===== */
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 16px;
+    }
+
+    .empty-title {
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .empty-desc {
+        color: #6b7280;
+        margin-bottom: 20px;
+    }
+
+    /* ===== Animation ===== */
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .options-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .question-header {
+            flex-direction: column;
+        }
+
+        .question-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
 </style>
 
-<div class="page" x-data="quizEditForm()" x-init="loadQuiz()">
-  <div class="container">
-    <a :href="'/teacher/courses/' + courseId" class="back">← Kembali ke Kursus</a>
+<div class="quiz-edit-page" x-data="quizEditForm()" x-init="loadQuiz()">
+    <div class="quiz-container">
+        
+        <!-- Back Link -->
+        <a :href="'/teacher/courses/' + courseId" class="back-link">
+            ← Kembali ke Kursus
+        </a>
 
-    <!-- Quiz Settings Card -->
-    <div class="card">
-      <h3>⚙️ Pengaturan Quiz</h3>
-
-      <div class="loading" x-show="loading">Memuat data quiz...</div>
-
-      <div class="alert alert-error" x-show="error" x-text="error"></div>
-      <div class="alert alert-success" x-show="success" x-text="success"></div>
-
-      <form @submit.prevent="submitForm" x-show="!loading && quiz">
-        <div class="form-group">
-          <label>Judul Quiz</label>
-          <input type="text" x-model="title" class="form-control" required>
-        </div>
-
-        <div class="form-group">
-          <label>Jumlah Attempt</label>
-          <select x-model="max_attempt" class="form-control">
-            <option value="1">1x Attempt (Sekali saja)</option>
-            <option value="2">2x Attempt</option>
-            <option value="3">3x Attempt</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Durasi Pengerjaan (menit)</label>
-          <input type="number" x-model="duration" class="form-control" min="1">
-        </div>
-
-        <div class="form-group">
-          <label>Deadline Quiz</label>
-          <input type="datetime-local" x-model="deadline" class="form-control">
-        </div>
-
-        <div class="form-group">
-          <label>Akses Review Jawaban</label>
-          <select x-model="show_review" class="form-control">
-            <option value="1">Boleh lihat review</option>
-            <option value="0">Tidak boleh lihat review</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Status Quiz</label>
-          <select x-model="is_published" class="form-control">
-            <option value="1">👁️ Dibuka untuk siswa</option>
-            <option value="0">🔒 Disembunyikan</option>
-          </select>
-        </div>
-
-        <div class="actions">
-          <button type="submit" class="btn btn-primary" :disabled="saving">
-            <span x-text="saving ? '⏳ Menyimpan...' : '💾 Simpan Perubahan'"></span>
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Questions Card -->
-    <div class="card" x-show="!loading && quiz">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <h3 style="margin:0">📝 Daftar Soal</h3>
-        <a :href="'/teacher/quizzes/' + quizId + '/questions/create'" class="btn btn-primary btn-sm">➕ Tambah Soal</a>
-      </div>
-
-      <!-- Questions List -->
-      <div x-show="questions.length > 0">
-        <template x-for="(q, index) in questions" :key="q.id">
-          <div class="question-item">
-            <div class="question-header">
-              <span class="question-number" x-text="index + 1"></span>
-              <div class="question-text" x-text="q.question"></div>
-              <div class="question-actions">
-                <a :href="'/teacher/quizzes/' + quizId + '/questions/' + q.id + '/edit'" class="btn btn-sm">✏️ Edit</a>
-                <button class="btn btn-sm btn-danger" @click="deleteQuestion(q.id)">🗑️</button>
-              </div>
+        <!-- Quiz Settings Card -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h2 class="card-title">⚙️ Pengaturan Quiz</h2>
             </div>
-            <div class="options-preview">
-              <span>A: <span x-text="q.option_a"></span></span> |
-              <span>B: <span x-text="q.option_b"></span></span> |
-              <span>C: <span x-text="q.option_c"></span></span> |
-              <span>D: <span x-text="q.option_d"></span></span>
-              <span class="correct-answer" style="margin-left:10px">✓ Jawaban: <span x-text="q.correct_answer"></span></span>
+
+            <!-- Loading -->
+            <div class="loading-state" x-show="loading">
+                <span class="loading-spinner">⏳</span>
+                <p>Memuat data quiz...</p>
             </div>
-          </div>
-        </template>
-      </div>
 
-      <div x-show="questions.length === 0" style="text-align:center;padding:20px;color:#6b7280">
-        Belum ada soal. Klik "Tambah Soal" untuk membuat soal baru.
-      </div>
+            <!-- Alerts -->
+            <div class="alert alert-error" x-show="error">
+                ❌ <span x-text="error"></span>
+            </div>
+            <div class="alert alert-success" x-show="success">
+                ✅ <span x-text="success"></span>
+            </div>
+
+            <!-- Form -->
+            <form @submit.prevent="submitForm" x-show="!loading && quiz">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="form-label">Judul Quiz</label>
+                        <input type="text" x-model="title" class="form-control" placeholder="Masukkan judul quiz..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Jumlah Attempt</label>
+                        <select x-model="max_attempt" class="form-control">
+                            <option value="1">1x Attempt (Sekali saja)</option>
+                            <option value="2">2x Attempt</option>
+                            <option value="3">3x Attempt</option>
+                            <option value="5">5x Attempt</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Durasi (menit)</label>
+                        <input type="number" x-model="duration" class="form-control" min="1" placeholder="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Deadline Quiz</label>
+                        <input type="datetime-local" x-model="deadline" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Akses Review</label>
+                        <select x-model="show_review" class="form-control">
+                            <option value="1">✅ Boleh lihat review</option>
+                            <option value="0">🚫 Tidak boleh lihat</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Status Quiz</label>
+                        <select x-model="is_published" class="form-control">
+                            <option value="1">👁️ Dibuka untuk siswa</option>
+                            <option value="0">🔒 Disembunyikan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary" :disabled="saving">
+                        <span x-text="saving ? '⏳ Menyimpan...' : '💾 Simpan Perubahan'"></span>
+                    </button>
+                    <a :href="'/teacher/courses/' + courseId" class="btn">✖ Batal</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Questions Card -->
+        <div class="questions-card" x-show="!loading && quiz">
+            <div class="card-header">
+                <h2 class="card-title">📝 Daftar Soal</h2>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <span class="question-count" x-text="questions.length + ' Soal'"></span>
+                    <a :href="'/teacher/quizzes/' + quizId + '/questions/create'" class="btn btn-primary btn-sm">
+                        ➕ Tambah Soal
+                    </a>
+                </div>
+            </div>
+
+            <!-- Questions List -->
+            <div x-show="questions.length > 0">
+                <template x-for="(q, index) in questions" :key="q.id">
+                    <div class="question-item">
+                        <div class="question-header">
+                            <span class="question-number" x-text="index + 1"></span>
+                            <div class="question-content">
+                                <div class="question-text" x-text="q.question"></div>
+                                <div class="options-grid">
+                                    <div class="option-item">
+                                        <span class="option-letter">A.</span>
+                                        <span x-text="q.option_a"></span>
+                                    </div>
+                                    <div class="option-item">
+                                        <span class="option-letter">B.</span>
+                                        <span x-text="q.option_b"></span>
+                                    </div>
+                                    <div class="option-item">
+                                        <span class="option-letter">C.</span>
+                                        <span x-text="q.option_c"></span>
+                                    </div>
+                                    <div class="option-item">
+                                        <span class="option-letter">D.</span>
+                                        <span x-text="q.option_d"></span>
+                                    </div>
+                                </div>
+                                <div class="correct-answer-badge">
+                                    ✓ Jawaban Benar: <span x-text="q.correct_answer"></span>
+                                </div>
+                            </div>
+                            <div class="question-actions">
+                                <a :href="'/teacher/quizzes/' + quizId + '/questions/' + q.id + '/edit'" class="btn btn-sm">
+                                    ✏️ Edit
+                                </a>
+                                <button class="btn btn-sm btn-danger" @click="deleteQuestion(q.id)">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" x-show="questions.length === 0">
+                <div class="empty-icon">📋</div>
+                <p class="empty-title">Belum Ada Soal</p>
+                <p class="empty-desc">Quiz ini belum memiliki soal. Tambahkan soal untuk memulai.</p>
+                <a :href="'/teacher/quizzes/' + quizId + '/questions/create'" class="btn btn-primary">
+                    ➕ Tambah Soal Pertama
+                </a>
+            </div>
+        </div>
+
     </div>
-
-    <a :href="'/teacher/courses/' + courseId" class="btn">← Kembali ke Kursus</a>
-  </div>
 </div>
 
 <script>
