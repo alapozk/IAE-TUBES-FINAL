@@ -49,7 +49,7 @@ services:
       MYSQL_USER: lms_user
       MYSQL_PASSWORD: secret
     ports:
-      - "3306:3306"
+      - "3310:3306"
     volumes:
       - mysql_main_data:/var/lib/mysql
     networks:
