@@ -452,43 +452,6 @@ graph TD
 
 ---
 
-## 🔄 Data Flow Example: Student Takes Quiz
-
-```mermaid
-sequenceDiagram
-    participant S as Student
-    participant C as Controller
-    participant Q as Quiz Model
-    participant A as Attempt Model
-    participant GuruDB as Guru DB
-    participant SiswaDB as Siswa DB
-    
-    S->>C: Access Quiz Page
-    C->>Q: Get Quiz Details
-    Q->>GuruDB: SELECT quiz, questions, options
-    GuruDB-->>Q: Return data
-    Q-->>C: Quiz data
-    C-->>S: Display quiz form
-    
-    S->>C: Start Quiz
-    C->>A: Create Quiz Attempt
-    A->>SiswaDB: INSERT into quiz_attempts
-    SiswaDB-->>A: Attempt created
-    A-->>C: Attempt ID
-    C-->>S: Quiz started
-    
-    S->>C: Submit Answers
-    C->>A: Save Answers
-    A->>SiswaDB: INSERT quiz_answers
-    C->>A: Calculate Score
-    A->>SiswaDB: UPDATE attempt score
-    SiswaDB-->>A: Updated
-    A-->>C: Final score
-    C-->>S: Show results
-```
-
----
-
 **Platform**: Windows 10/11  
 **Laravel Version**: 11.x  
 **Last Updated**: 2026-01-06
